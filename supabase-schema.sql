@@ -11,11 +11,17 @@ create table if not exists public.organizations (
 create table if not exists public.organization_members (
   organization_id uuid not null references public.organizations(id) on delete cascade,
   user_id uuid not null references auth.users(id) on delete cascade,
+  full_name text,
+  email text,
   role text not null default 'member' check (role in ('admin','member')),
   created_at timestamptz not null default now(),
   primary key (organization_id,user_id),
   unique (user_id)
 );
+
+-- Compatibilidade para projetos que executaram uma versão anterior deste arquivo.
+alter table public.organization_members add column if not exists full_name text;
+alter table public.organization_members add column if not exists email text;
 
 create index if not exists organization_members_user_id_idx on public.organization_members(user_id);
 
@@ -51,6 +57,26 @@ $$;
 revoke all on function public.current_organization_ids() from public;
 grant execute on function public.current_organization_ids() to authenticated;
 
+-- Permite verificar privilégios sem criar recursão nas políticas de membros.
+create or replace function public.is_organization_admin(target_organization_id uuid)
+returns boolean
+language sql
+security definer
+set search_path = ''
+stable
+as $$
+  select exists (
+    select 1
+    from public.organization_members
+    where user_id = (select auth.uid())
+      and organization_id = target_organization_id
+      and role = 'admin'
+  )
+$$;
+
+revoke all on function public.is_organization_admin(uuid) from public;
+grant execute on function public.is_organization_admin(uuid) to authenticated;
+
 drop policy if exists "members can read their organization" on public.organizations;
 create policy "members can read their organization"
 on public.organizations for select to authenticated
@@ -60,6 +86,11 @@ drop policy if exists "users can read their membership" on public.organization_m
 create policy "users can read their membership"
 on public.organization_members for select to authenticated
 using (user_id = (select auth.uid()));
+
+drop policy if exists "admins can read organization members" on public.organization_members;
+create policy "admins can read organization members"
+on public.organization_members for select to authenticated
+using (public.is_organization_admin(organization_id));
 
 drop policy if exists "members can read their emissions" on public.emissions;
 create policy "members can read their emissions"

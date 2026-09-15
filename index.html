@@ -48,7 +48,12 @@ input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:9
 .actions{display:flex;gap:9px;margin-top:12px}
 .summary{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:14px 0}
 .stat{background:#111c32;border:1px solid #263650;border-radius:9px;padding:10px} .stat small{display:block;color:#94a3b8} .stat strong{display:block;margin-top:4px}
-@media(max-width:850px){.grid3,.grid2,.passengers,.summary{grid-template-columns:1fr}.login{padding:18px}.login-shell{display:block;max-width:470px}.login-hero{display:none}.login-card{padding:38px 28px;min-height:calc(100vh - 36px)}}
+.admin-card{border-color:#bfdbfe;background:linear-gradient(180deg,#eff6ff 0,#fff 120px)}
+.admin-heading{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:20px}.admin-heading p{margin-bottom:0}
+.admin-form{display:grid;grid-template-columns:1.2fr 1.4fr .8fr auto;gap:12px;align-items:end;padding:18px;background:white;border:1px solid var(--line);border-radius:12px}.admin-form .field{margin:0}.admin-form .btn{height:42px}
+.admin-message{min-height:20px;margin:12px 0 0;font-size:13px;font-weight:700}.admin-message.error{color:var(--red)}.admin-message.success{color:var(--green)}
+.member-list{margin-top:20px;display:grid;gap:9px}.member-row{display:grid;grid-template-columns:1.2fr 1.5fr .7fr;gap:12px;align-items:center;padding:13px 15px;background:white;border:1px solid var(--line);border-radius:10px}.member-name{font-weight:800;color:var(--navy)}.role-badge{justify-self:start;padding:5px 9px;border-radius:999px;background:#e2e8f0;font-size:11px;font-weight:800;text-transform:uppercase}.role-badge.admin{background:#dbeafe;color:#1d4ed8}.empty-members{text-align:center;padding:22px;color:var(--muted)}
+@media(max-width:850px){.grid3,.grid2,.passengers,.summary,.admin-form{grid-template-columns:1fr}.login{padding:18px}.login-shell{display:block;max-width:470px}.login-hero{display:none}.login-card{padding:38px 28px;min-height:calc(100vh - 36px)}.top{align-items:flex-start;gap:14px}.top>div:last-child{text-align:right}.member-row{grid-template-columns:1fr}.role-badge{justify-self:start}}
 @media(max-width:420px){.login{padding:0}.login-shell{border:0;border-radius:0;min-height:100vh}.login-card{padding:32px 22px;min-height:100vh}.login-title{font-size:24px}}
 </style>
 </head>
@@ -81,9 +86,21 @@ input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:9
 </section>
 
 <section id="app" class="screen">
-<header class="top"><div><strong>Facilitador de Emissão GDS</strong><div class="small" style="color:#94a3b8;margin-top:4px">Amadeus • Sabre • Galileo</div></div><div><span id="companyName" class="small" style="margin-right:12px;color:#cbd5e1"></span><span style="margin-right:12px">BETA 1.0</span><button class="btn secondary" onclick="logout()">Sair</button></div></header>
+<header class="top"><div><strong>Facilitador de Emissão GDS</strong><div class="small" style="color:#94a3b8;margin-top:4px">Amadeus • Sabre • Galileo</div></div><div><span id="companyName" class="small" style="margin-right:12px;color:#cbd5e1"></span><span style="margin-right:12px">BETA 1.0</span><button id="adminButton" class="btn secondary hidden" type="button" onclick="toggleAdminPanel()" style="margin-right:8px">Usuários</button><button class="btn secondary" onclick="logout()">Sair</button></div></header>
 <main class="wrap">
 <div class="notice"><strong>Privacidade:</strong> os dados do cartão são usados somente para compor o comando no navegador. Este protótipo não grava os dados.</div>
+
+<section id="adminPanel" class="card admin-card hidden">
+<div class="admin-heading"><div><h2>Administração de usuários</h2><p class="muted">Convide pessoas para acessar esta empresa.</p></div><button class="btn secondary" type="button" onclick="toggleAdminPanel(false)">Fechar</button></div>
+<form id="inviteForm" class="admin-form" onsubmit="inviteUser(event)">
+<div class="field"><label for="inviteName">Nome completo</label><input id="inviteName" autocomplete="name" placeholder="Nome do usuário" required></div>
+<div class="field"><label for="inviteEmail">E-mail</label><input id="inviteEmail" type="email" autocomplete="email" placeholder="nome@empresa.com" required></div>
+<div class="field"><label for="inviteRole">Perfil</label><select id="inviteRole"><option value="member">Usuário</option><option value="admin">Administrador</option></select></div>
+<button class="btn primary" type="submit">Enviar convite</button>
+</form>
+<div id="inviteMessage" class="admin-message" role="status" aria-live="polite"></div>
+<div id="memberList" class="member-list"><div class="empty-members">Carregando usuários...</div></div>
+</section>
 
 <section class="card">
 <h2>Dados da emissão</h2>
@@ -199,6 +216,8 @@ const hasSupabaseConfiguration=SUPABASE_URL.startsWith('https://')&&!SUPABASE_UR
 const supabaseClient=hasSupabaseConfiguration&&window.supabase
  ?window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY):null;
 let recoveryMode=false;
+let passwordFlow='recovery';
+let currentMembership=null;
 
 function showScreen(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0)}
 function setLoginMessage(message,type='error'){
@@ -246,12 +265,14 @@ async function resetPassword(){
    resetButton.disabled=false;resetButton.textContent='Esqueci minha senha';
  }
 }
-function showPasswordRecovery(){
+function showPasswordSetup(flow='recovery'){
+ passwordFlow=flow;
  showScreen('login');
- document.querySelector('.login-title').textContent='Redefinir senha';
+ document.querySelector('.login-title').textContent=flow==='invite'?'Cadastre sua senha':'Redefinir senha';
  document.getElementById('loginSubtitle').classList.add('hidden');
  document.getElementById('loginForm').classList.add('hidden');
  document.getElementById('passwordForm').classList.remove('hidden');
+ document.querySelector('#passwordForm .login-subtitle').textContent=flow==='invite'?'Defina uma senha para concluir seu cadastro.':'Crie uma nova senha para sua conta.';
  document.getElementById('newPassword').focus();
 }
 async function updatePassword(event){
@@ -276,7 +297,7 @@ async function updatePassword(event){
    document.getElementById('loginForm').classList.remove('hidden');
    document.getElementById('loginSubtitle').classList.remove('hidden');
    document.querySelector('.login-title').textContent='Bem-vindo';
-   setLoginMessage('Senha alterada. Entre com sua nova senha.','success');
+   setLoginMessage(passwordFlow==='invite'?'Cadastro concluído. Entre com sua senha.':'Senha alterada. Entre com sua nova senha.','success');
  }catch(_error){message.textContent='Não foi possível alterar a senha. Solicite um novo link.'}
  finally{button.disabled=false;button.textContent='Salvar nova senha'}
 }
@@ -294,15 +315,18 @@ async function login(event){
 }
 async function logout(){
  if(supabaseClient)await supabaseClient.auth.signOut();
+ currentMembership=null;
+ document.getElementById('adminButton').classList.add('hidden');
+ document.getElementById('adminPanel').classList.add('hidden');
  document.getElementById('loginError').textContent='';
  showScreen('login');
  document.getElementById('loginUser').focus();
 }
 async function applySession(session){
- if(!session){document.getElementById('companyName').textContent='';showScreen('login');return}
+ if(!session){currentMembership=null;document.getElementById('companyName').textContent='';document.getElementById('adminButton').classList.add('hidden');showScreen('login');return}
  const {data:membership,error}=await supabaseClient
    .from('organization_members')
-   .select('organization:organizations(name)')
+   .select('organization_id,role,full_name,email,organization:organizations(name)')
    .eq('user_id',session.user.id)
    .maybeSingle();
  if(error){
@@ -317,23 +341,78 @@ async function applySession(session){
    showScreen('login');
    return;
  }
+ currentMembership=membership;
  document.getElementById('companyName').textContent=membership.organization.name;
+ document.getElementById('adminButton').classList.toggle('hidden',membership.role!=='admin');
  document.getElementById('loginError').textContent='';
  showScreen('app');
 }
 async function initializeAuthentication(){
  if(!supabaseClient){document.getElementById('loginError').textContent='Configure o Supabase em supabase-config.js para ativar o acesso.';return}
- recoveryMode=new URLSearchParams(window.location.hash.slice(1)).get('type')==='recovery';
+ const linkType=new URLSearchParams(window.location.hash.slice(1)).get('type');
+ recoveryMode=linkType==='recovery'||linkType==='invite';
+ if(linkType==='invite')passwordFlow='invite';
  supabaseClient.auth.onAuthStateChange((event,nextSession)=>{
    if(event==='PASSWORD_RECOVERY'){
      recoveryMode=true;
-     setTimeout(showPasswordRecovery,0);
+     passwordFlow='recovery';
+     setTimeout(()=>showPasswordSetup('recovery'),0);
      return;
    }
    if(!recoveryMode)setTimeout(()=>applySession(nextSession),0);
  });
  const {data:{session}}=await supabaseClient.auth.getSession();
- if(recoveryMode)showPasswordRecovery();else await applySession(session);
+ if(recoveryMode)showPasswordSetup(passwordFlow);else await applySession(session);
+}
+function toggleAdminPanel(force){
+ if(currentMembership?.role!=='admin')return;
+ const panel=document.getElementById('adminPanel');
+ const show=typeof force==='boolean'?force:panel.classList.contains('hidden');
+ panel.classList.toggle('hidden',!show);
+ if(show){loadMembers();panel.scrollIntoView({behavior:'smooth',block:'start'})}
+}
+function setInviteMessage(message,type=''){
+ const element=document.getElementById('inviteMessage');
+ element.textContent=message;element.className=`admin-message ${type}`.trim();
+}
+function renderMembers(members){
+ const list=document.getElementById('memberList');list.replaceChildren();
+ if(!members.length){const empty=document.createElement('div');empty.className='empty-members';empty.textContent='Nenhum usuário encontrado.';list.appendChild(empty);return}
+ members.forEach(member=>{
+   const row=document.createElement('div');row.className='member-row';
+   const name=document.createElement('div');name.className='member-name';name.textContent=member.full_name||'Nome não informado';
+   const email=document.createElement('div');email.className='muted';email.textContent=member.email||'E-mail não informado';
+   const role=document.createElement('span');role.className=`role-badge ${member.role}`;role.textContent=member.role==='admin'?'Administrador':'Usuário';
+   row.append(name,email,role);list.appendChild(row);
+ });
+}
+async function loadMembers(){
+ if(currentMembership?.role!=='admin')return;
+ const list=document.getElementById('memberList');list.innerHTML='<div class="empty-members">Carregando usuários...</div>';
+ const {data,error}=await supabaseClient.from('organization_members').select('user_id,full_name,email,role,created_at').eq('organization_id',currentMembership.organization_id).order('full_name',{ascending:true});
+ if(error){list.innerHTML='<div class="empty-members">Não foi possível carregar os usuários. Verifique se o SQL atualizado foi executado.</div>';return}
+ renderMembers(data||[]);
+}
+async function inviteUser(event){
+ event.preventDefault();
+ if(currentMembership?.role!=='admin'){setInviteMessage('Apenas administradores podem convidar usuários.','error');return}
+ const form=event.currentTarget;const button=form.querySelector('button[type="submit"]');
+ const fullName=document.getElementById('inviteName').value.trim();
+ const email=document.getElementById('inviteEmail').value.trim().toLowerCase();
+ const role=document.getElementById('inviteRole').value;
+ button.disabled=true;button.textContent='Enviando...';setInviteMessage('');
+ try{
+   const {data,error}=await supabaseClient.functions.invoke('hyper-function',{body:{fullName,email,role}});
+   if(error)throw error;
+   if(!data?.ok)throw new Error(data?.error||'Falha ao enviar convite.');
+   form.reset();setInviteMessage(`Convite enviado para ${email}.`,'success');await loadMembers();
+ }catch(error){
+   let message=error?.message||'';
+   try{const details=await error?.context?.json();message=details?.error||message}catch(_ignored){}
+   if(/already|registered|exists|cadastrad/i.test(message))setInviteMessage('Este e-mail já está cadastrado.','error');
+   else if(/rate|limit|429/i.test(message))setInviteMessage('Limite de e-mails atingido. Aguarde antes de enviar outro convite.','error');
+   else setInviteMessage('Não foi possível enviar o convite. Verifique a configuração da função e tente novamente.','error');
+ }finally{button.disabled=false;button.textContent='Enviar convite'}
 }
 function n(id){return parseFloat(document.getElementById(id).value)||0}
 function i(id){return parseInt(document.getElementById(id).value)||0}

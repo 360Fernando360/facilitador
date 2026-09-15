@@ -1,0 +1,4 @@
+project_id = "vayypajjcmutxzohuwbm"
+
+[functions.hyper-function]
+verify_jwt = false
