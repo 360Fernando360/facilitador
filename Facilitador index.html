@@ -1,0 +1,304 @@
+```
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Facilitador de Emissão GDS — Beta 1.0</title>
+<style>
+:root{--navy:#0f172a;--navy2:#1e293b;--blue:#2563eb;--bg:#f1f5f9;--card:#fff;--line:#dbe3ee;--text:#334155;--muted:#64748b;--green:#16a34a;--red:#dc2626}
+*{box-sizing:border-box}
+body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:linear-gradient(#e2e8f0,#f8fafc);color:var(--text)}
+.screen{display:none;min-height:100vh} .screen.active{display:block}
+.login{min-height:100vh;display:grid;place-items:center;padding:24px}
+.login-card{width:min(430px,100%);background:white;padding:30px;border-radius:18px;box-shadow:0 18px 45px #0f172a20}
+.brand{display:flex;gap:12px;align-items:center;margin-bottom:22px} .logo{width:46px;height:46px;border-radius:12px;background:var(--navy);color:white;display:grid;place-items:center;font-weight:800}
+h1,h2,h3,p{margin-top:0} .muted{color:var(--muted)} .small{font-size:12px}
+label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:9px;padding:0 11px;background:white}
+.field{margin-bottom:15px} .btn{border:0;border-radius:9px;padding:11px 15px;font-weight:700;cursor:pointer}
+.primary{background:var(--blue);color:white} .secondary{background:white;border:1px solid var(--line);color:var(--text)} .danger{background:var(--red);color:white}
+.top{background:linear-gradient(135deg,var(--navy),var(--navy2));color:white;padding:20px 26px;display:flex;justify-content:space-between;align-items:center}
+.wrap{max-width:1150px;margin:auto;padding:24px 18px 40px}
+.notice{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;padding:14px 16px;border-radius:10px;margin-bottom:18px}
+.card{background:white;border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:18px;box-shadow:0 8px 24px #0f172a0d}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px} .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.passengers{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.pax{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:16px}
+.pax-title{font-weight:800;margin-bottom:13px} .pill{display:inline-block;background:var(--navy);color:white;padding:4px 7px;border-radius:6px;font-size:11px;margin-right:6px}
+.pax.is-disabled{opacity:.58;background:#e2e8f0}
+.pax.is-disabled input{cursor:not-allowed;background:#e2e8f0}
+.inf-notice{color:var(--red);font-size:12px;font-weight:700;margin:-5px 0 12px}
+.otato-box{background:#ecfdf5;border:1px solid #bbf7d0;border-radius:10px;padding:12px 14px}
+.otato-code{font-family:Consolas,monospace;font-weight:800;color:#166534;font-size:18px}
+.hidden{display:none}
+.result{background:var(--navy);color:white;border-radius:14px;padding:20px}
+.command{background:#020617;border:1px solid #334155;border-radius:9px;padding:15px;color:#4ade80;white-space:pre-wrap;word-break:break-all;min-height:90px;font-family:Consolas,monospace}
+.actions{display:flex;gap:9px;margin-top:12px}
+.summary{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:14px 0}
+.stat{background:#111c32;border:1px solid #263650;border-radius:9px;padding:10px} .stat small{display:block;color:#94a3b8} .stat strong{display:block;margin-top:4px}
+@media(max-width:850px){.grid3,.grid2,.passengers,.summary{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<section id="login" class="screen active">
+<div class="login"><div class="login-card">
+<div class="brand"><div class="logo">FE</div><div><h1 style="margin-bottom:4px">Facilitador de Emissão</h1><div class="muted">Beta 1.0</div></div></div>
+<div class="field"><label>Usuário ou e-mail</label><input placeholder="seu.usuario"></div>
+<div class="field"><label>Senha</label><input type="password" placeholder="••••••••"></div>
+<button class="btn primary" style="width:100%" onclick="go('app')">Entrar</button>
+<p class="small muted" style="margin-top:14px">Protótipo: o login ainda não possui autenticação real.</p>
+</div></div>
+</section>
+
+<section id="app" class="screen">
+<header class="top"><div><strong>Facilitador de Emissão GDS</strong><div class="small" style="color:#94a3b8;margin-top:4px">Amadeus • Sabre • Galileo</div></div><div><span style="margin-right:12px">BETA 1.0</span><button class="btn secondary" onclick="go('login')">Sair</button></div></header>
+<main class="wrap">
+<div class="notice"><strong>Privacidade:</strong> os dados do cartão são usados somente para compor o comando no navegador. Este protótipo não grava os dados.</div>
+
+<section class="card">
+<h2>Dados da emissão</h2>
+<div class="grid3">
+<div class="field"><label>GDS de emissão *</label><select id="gds" onchange="updateAll()"><option value="">Selecione</option><option>AMADEUS</option><option>SABRE</option><option>GALILEO</option></select></div>
+<div class="field"><label>Companhia aérea *</label><select id="cia" onchange="updateAll()"><option value="">Selecione a companhia</option><option value="AA">AA - American Airlines</option>
+<option value="AC">AC - Air Canada</option>
+<option value="AD">AD - Azul</option>
+<option value="AF">AF - Air France</option>
+<option value="KL">KL - KLM</option>
+<option value="AM">AM - Aeroméxico</option>
+<option value="AR">AR - Aerolíneas Argentinas</option>
+<option value="AT">AT - Royal Air Maroc</option>
+<option value="AV">AV - Avianca</option>
+<option value="AZ">AZ - ITA Airways</option>
+<option value="BA">BA - British Airways</option>
+<option value="CA">CA - Air China</option>
+<option value="CM">CM - Copa Airlines</option>
+<option value="CX">CX - Cathay Pacific</option>
+<option value="DE">DE - Condor</option>
+<option value="DL">DL - Delta Air Lines</option>
+<option value="DT">DT - TAAG</option>
+<option value="EK">EK - Emirates</option>
+<option value="ET">ET - Ethiopian</option>
+<option value="G3">G3 - Gol</option>
+<option value="H2">H2 - Sky Airline</option>
+<option value="HR">HR - Hahn Air</option>
+<option value="IB">IB - Iberia</option>
+<option value="JA">JA - JetSmart</option>
+<option value="JL">JL - Japan Airlines</option>
+<option value="KE">KE - Korean Air</option>
+<option value="LA">LA - LATAM</option>
+<option value="LY">LY - El Al</option>
+<option value="LH">LH - Lufthansa</option>
+<option value="LX">LX - Swiss</option>
+<option value="NH">NH - All Nippon</option>
+<option value="NZ">NZ - Air New Zealand</option>
+<option value="OB">OB - Boliviana de Aviación</option>
+<option value="QF">QF - Qantas</option>
+<option value="QR">QR - Qatar Airways</option>
+<option value="SA">SA - South African</option>
+<option value="SQ">SQ - Singapore Airlines</option>
+<option value="TK">TK - Turkish Airlines</option>
+<option value="TP">TP - TAP Air Portugal</option>
+<option value="UA">UA - United Airlines</option>
+<option value="UX">UX - Air Europa</option></select></div>
+<div class="field"><label>Quantidade de parcelas *</label><input id="parcelas" type="number" min="1" max="12" value="1" oninput="updateAll()"></div>
+</div>
+<div class="grid2">
+<div class="otato-box"><div class="small">OTATO calculado automaticamente</div><div id="otato" class="otato-code">—</div></div>
+<div class="otato-box"><div class="small">Companhia selecionada</div><div id="ciaNome" class="otato-code">—</div></div>
+</div>
+</section>
+
+<section class="card">
+<h2>Forma de pagamento</h2>
+<div class="grid3">
+<div class="field"><label>Forma de pagamento *</label><select id="forma" onchange="toggleForma();updateAll()"><option value="CARTAO">Somente cartão</option><option value="FATURADO_CARTAO">Duas formas: Faturado + Cartão</option></select></div>
+<div id="fatField" class="field hidden"><label>Valor faturado / Cash global (R$) *</label><input id="faturado" type="number" min="0" step="0.01" placeholder="0,00" oninput="updateAll()"></div>
+<div class="field"><label>Bandeira *</label><select id="bandeira" onchange="updateAll()"><option value="">Selecione</option><option value="VI">Visa (VI)</option><option value="CA">Mastercard (CA)</option><option value="AX">American Express (AX)</option><option value="DC">Diners Club (DC)</option><option value="EL">Elo (EL)</option></select></div>
+</div>
+<div class="grid3">
+<div class="field"><label>Número do cartão *</label><input id="cartao" autocomplete="off" placeholder="Digite o número completo"></div>
+<div class="field"><label>Validade (MMAA) *</label><input id="validade" maxlength="4" placeholder="1226"></div>
+<div class="field"><label>Código de autorização *</label><input id="auth" placeholder="Ex.: 123456"></div>
+</div>
+</section>
+
+<section class="card">
+<h2>Passageiros, tarifas e taxas</h2>
+<p class="muted">Informe os valores individuais de cada categoria.</p>
+<div class="passengers">
+<div class="pax"><div class="pax-title"><span class="pill">ADT</span>Adulto</div>
+<div class="field"><label>Quantidade</label><input id="qAdt" type="number" min="0" value="1" oninput="updateAll()"></div>
+<div class="field"><label>Tarifa individual (R$)</label><input id="tAdt" type="number" min="0" step="0.01" oninput="updateAll()"></div>
+<div class="field"><label>Taxa individual (R$)</label><input id="xAdt" type="number" min="0" step="0.01" oninput="updateAll()"></div></div>
+
+<div class="pax"><div class="pax-title"><span class="pill">CHD</span>Criança</div>
+<div class="field"><label>Quantidade</label><input id="qChd" type="number" min="0" value="0" oninput="updateAll()"></div>
+<div class="field"><label>Tarifa individual (R$)</label><input id="tChd" type="number" min="0" step="0.01" oninput="updateAll()"></div>
+<div class="field"><label>Taxa individual (R$)</label><input id="xChd" type="number" min="0" step="0.01" oninput="updateAll()"></div></div>
+
+<div class="pax" id="infPax"><div class="pax-title"><span class="pill">INF</span>Bebê</div>
+<div id="infNotice" class="inf-notice hidden">Indisponível para Faturado + Cartão</div>
+<div class="field"><label>Quantidade</label><input id="qInf" type="number" min="0" value="0" oninput="updateAll()"></div>
+<div class="field"><label>Tarifa individual (R$)</label><input id="tInf" type="number" min="0" step="0.01" oninput="updateAll()"></div>
+<div class="field"><label>Taxa individual (R$)</label><input id="xInf" type="number" min="0" step="0.01" oninput="updateAll()"></div></div>
+</div>
+</section>
+
+<section class="result">
+<h2>Comando gerado</h2>
+<div class="summary">
+<div class="stat"><small>Tarifas</small><strong id="sumTar">R$ 0,00</strong></div>
+<div class="stat"><small>Taxas</small><strong id="sumTax">R$ 0,00</strong></div>
+<div class="stat"><small>Total</small><strong id="sumTot">R$ 0,00</strong></div>
+<div class="stat"><small>Faturado</small><strong id="sumFat">R$ 0,00</strong></div>
+<div class="stat"><small>Cartão</small><strong id="sumCard">R$ 0,00</strong></div>
+</div>
+<pre id="cmd" class="command">Preencha os campos obrigatórios para gerar o comando.</pre>
+<div id="alert" style="color:#fca5a5;margin-top:9px;font-size:13px"></div>
+<div class="actions"><button class="btn primary" onclick="generate()">Gerar comando</button><button class="btn secondary" onclick="copyCmd()">Copiar comando</button><button class="btn danger" onclick="clearForm()">Limpar</button></div>
+</section>
+</main>
+</section>
+
+<script>
+function go(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0)}
+function n(id){return parseFloat(document.getElementById(id).value)||0}
+function i(id){return parseInt(document.getElementById(id).value)||0}
+function br(v){return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+function money(v){return Math.round((Number(v)||0)*100)/100}
+let infCache={q:'0',t:'',x:''};
+function setInfInibido(inibir){
+ const ids=['qInf','tInf','xInf'];
+ const campos=ids.map(id=>document.getElementById(id));
+ const estavaInibido=campos[0].disabled;
+ if(inibir&&!estavaInibido){
+   infCache={q:campos[0].value,t:campos[1].value,x:campos[2].value};
+   campos[0].value='0';campos[1].value='';campos[2].value='';
+ }
+ if(!inibir&&estavaInibido){
+   campos[0].value=infCache.q;campos[1].value=infCache.t;campos[2].value=infCache.x;
+ }
+ campos.forEach(campo=>campo.disabled=inibir);
+ document.getElementById('infPax').classList.toggle('is-disabled',inibir);
+ const aviso=document.getElementById('infNotice');
+ aviso.textContent='INF deve ser emitido separadamente: faturado maior que a soma das taxas.';
+ aviso.classList.toggle('hidden',!inibir);
+}
+function atualizarRegraInf(){
+ const duasFormas=document.getElementById('forma').value==='FATURADO_CARTAO';
+ if(!duasFormas){setInfInibido(false);return}
+ const inibido=document.getElementById('qInf').disabled;
+ const qInfPotencial=parseInt(inibido?infCache.q:document.getElementById('qInf').value)||0;
+ const xInfPotencial=parseFloat(inibido?infCache.x:document.getElementById('xInf').value)||0;
+ const taxasPotenciais=n('xAdt')*i('qAdt')+n('xChd')*i('qChd')+xInfPotencial*qInfPotencial;
+ const dadosInfPreenchidos=qInfPotencial>0&&xInfPotencial>0;
+ setInfInibido(dadosInfPreenchidos&&n('faturado')>money(taxasPotenciais)+0.009);
+}
+function toggleForma(){
+ const duasFormas=document.getElementById('forma').value==='FATURADO_CARTAO';
+ document.getElementById('fatField').classList.toggle('hidden',!duasFormas);
+ atualizarRegraInf();
+}
+function obterOtato(cia,p,b){
+ p=parseInt(p)||1;
+ switch(cia){
+ case "AA":return "AA05"; case "AC":return "AC14"; case "AD":return "AD0001"; case "AF":return "AF04"; case "KL":return "KL04";
+ case "AM": if(b==="DC")return "AMDINE";if(b==="VI")return "AMVISA";if(b==="AX")return "AMAMEX";if(b==="CA")return "AMMAST";if(b==="EL")return "AMELO";return b?"AM"+b:"";
+ case "AR":return "AR"+String(p).padStart(2,"0"); case "AT":return "AT"+String(p).padStart(2,"0"); case "AV":return "AV10"; case "AZ":return "AZ"+String(p).padStart(2,"0");
+ case "BA":{let s=String(p).padStart(2,"0");return "BA"+s+s} case "CA":return "CA05";
+ case "CM":return "CM6";case "CX":case "DE":case "HR":case "JL":case "KE":return "";
+ case "DT":return p>=2&&p<=4?"DT"+String(p).padStart(2,"0"):"";
+ case "DL":return "DL0006"; case "EK":return "EK000"+p; case "ET":return "ET06"; case "G3":return "G301"; case "H2":return "H2"+String(p).padStart(2,"0");
+ case "IB":return "IB0000"; case "JA":return "JA01";
+ case "LA": if(p>=2&&p<=4)return "JJ"+String(p).padStart(2,"0"); if(p>=5&&p<=10)return "JJ1T"; return "";
+ case "LY":return "LY03";case "LH":return "LH100";case "LX":return "LX05";case "NH":return p<=3?"NH205":"NH200";case "NZ":return "NZ1";case "OB":return "ob0930";
+ case "QF":return "QF05";case "QR":return "QR05";case "SA":return "SA1";case "SQ":return "SQ005";
+ case "TK":if(b==="VI")return "TK05VI";if(b==="CA")return "TK05MC";if(b==="AX")return "TK05AX";if(b==="EL")return "TK05EL";return b?"TK05"+b:"";
+ case "TP":return "TP10";case "UA":return "UA1";case "UX":return "UX10";default:return "";
+ }
+}
+function totals(){
+ let tar=n('tAdt')*i('qAdt')+n('tChd')*i('qChd')+n('tInf')*i('qInf');
+ let tax=n('xAdt')*i('qAdt')+n('xChd')*i('qChd')+n('xInf')*i('qInf');
+ let total=tar+tax, fat=document.getElementById('forma').value==='FATURADO_CARTAO'?n('faturado'):0;
+ return {tar,tax,total,fat,card:Math.max(total-fat,0)}
+}
+function updateAll(){
+ atualizarRegraInf();
+ let cia=document.getElementById('cia'), code=cia.value, b=document.getElementById('bandeira').value, p=i('parcelas');
+ document.getElementById('otato').textContent=code? (obterOtato(code,p,b)||'Sem OTATO cadastrado para esta combinação'):'—';
+ document.getElementById('ciaNome').textContent=code?cia.options[cia.selectedIndex].text:'—';
+ let t=totals();document.getElementById('sumTar').textContent=br(t.tar);document.getElementById('sumTax').textContent=br(t.tax);document.getElementById('sumTot').textContent=br(t.total);document.getElementById('sumFat').textContent=br(t.fat);document.getElementById('sumCard').textContent=br(t.card);
+}
+function generate(){
+ const g=document.getElementById('gds').value, cia=document.getElementById('cia').value, p=i('parcelas'), b=document.getElementById('bandeira').value;
+ const card=document.getElementById('cartao').value.trim(), val=document.getElementById('validade').value.trim(), auth=document.getElementById('auth').value.trim();
+ const forma=document.getElementById('forma').value, t=totals(), ot=obterOtato(cia,p,b);
+ let alert=document.getElementById('alert'); alert.textContent='';
+ if(!g||!cia||!b||!card||!val||!auth){document.getElementById('cmd').textContent='Preencha os campos obrigatórios para gerar o comando.';alert.textContent='GDS, companhia, bandeira, cartão, validade e autorização são obrigatórios.';return}
+ if(i('qAdt')+i('qChd')+i('qInf')<=0){alert.textContent='Informe pelo menos 1 passageiro.';return}
+ if(forma==='FATURADO_CARTAO' && t.fat<t.tax){alert.textContent='Nas duas formas, o valor faturado deve cobrir pelo menos o total das taxas de embarque.';return}
+ const totalPax=i('qAdt')+i('qChd')+i('qInf');
+ const faturadoSomenteTaxas=forma==='FATURADO_CARTAO'&&Math.abs(money(t.fat)-money(t.tax))<0.01;
+ const faturadoIndividualMedio=forma==='FATURADO_CARTAO'?money(t.fat/totalPax):0;
+ if(g==='GALILEO' && forma==='FATURADO_CARTAO'){
+   const taxasAtivas=[['qAdt','xAdt'],['qChd','xChd'],['qInf','xInf']]
+     .filter(([q])=>i(q)>0)
+     .map(([,tx])=>n(tx));
+   if(!faturadoSomenteTaxas&&taxasAtivas.some(taxa=>faturadoIndividualMedio<taxa)){
+     alert.textContent='No Galileo, o valor faturado individual deve cobrir integralmente a taxa de embarque de cada passageiro.';
+     return;
+   }
+ }
+ let mspl=forma==='FATURADO_CARTAO'
+   ?Math.round(money(t.card/p)*100)
+   :Math.round(((i('qAdt')?n('tAdt')/p*i('qAdt'):0)+(i('qChd')?n('tChd')/p*i('qChd'):0)+(i('qInf')?n('tInf')/p*i('qInf'):0))*100);
+ const msplGalileoCartao=Math.round(money(
+   (i('qAdt')?money(n('tAdt')/p)*i('qAdt'):0)+
+   (i('qChd')?money(n('tChd')/p)*i('qChd'):0)+
+   (i('qInf')?money(n('tInf')/p)*i('qInf'):0)
+ )*100);
+ let lines=[];
+ const pax=[['qAdt','tAdt','xAdt'],['qChd','tChd','xChd'],['qInf','tInf','xInf']];
+ pax.forEach(([q,tf,tx])=>{if(i(q)<=0)return;let fare=n(tf),tax=n(tx),par=fare/p,res=fare-par;
+   const faturadoIndividual=faturadoSomenteTaxas?money(tax):faturadoIndividualMedio;
+   if(g==='AMADEUS'){
+      if(forma==='FATURADO_CARTAO'){
+        const saldoIndividual=money((fare+tax)-faturadoIndividual);
+        const parcelaIndividual=money(saldoIndividual/p);
+        const saldoAposPrimeira=money(saldoIndividual-parcelaIndividual);
+        lines.push(`FPINV+CC${b}${card}/${val}/BRL${parcelaIndividual.toFixed(2)}/N${auth}+MSPL${String(p).padStart(2,'0')}X${ot}X${mspl}/BRL${saldoAposPrimeira.toFixed(2)}`);
+      }
+      else lines.push(`FPCC${b}${card}/${val}/BRL${(par+tax).toFixed(2)}/N${auth}+MSPL${String(p).padStart(2,'0')}${ot?'X'+ot:''}X${mspl}/BRL${res.toFixed(2)}`);
+   } else if(g==='SABRE'){
+      if(forma==='FATURADO_CARTAO'){
+        const saldoIndividual=money((fare+tax)-faturadoIndividual);
+        const parcelaIndividual=money(saldoIndividual/p);
+        const tarifaMenosParcela=money(fare-parcelaIndividual);
+        lines.push(`50/*${faturadoIndividual.toFixed(2)}\nFMP${b}${card}/${val}*Z${auth}*MSPL${String(p).padStart(2,'0')}X${ot}X${mspl}//${tarifaMenosParcela.toFixed(2)}/${tax.toFixed(2)}XT`);
+      } else {
+        lines.push(`FMP${b}${card}/${val}*Z${auth}*MSPL${String(p).padStart(2,'0')}X${ot}X${mspl}//${res.toFixed(2)}`);
+      }
+   } else {
+      if(forma==='FATURADO_CARTAO'){
+        const saldoIndividual=money((fare+tax)-faturadoIndividual);
+        const parcelaIndividual=money(saldoIndividual/p);
+        const saldoAposPrimeira=money(saldoIndividual-parcelaIndividual);
+        lines.push(`INVOICE$${faturadoIndividual.toFixed(2)}\n${b}${card}*D${val}*A${auth}$${parcelaIndividual.toFixed(2)}\nMSCCPL${String(p).padStart(2,'0')}X${ot}X${mspl}$${saldoAposPrimeira.toFixed(2)}`);
+      } else {
+        const parcelaSemTaxa=money(fare/p);
+        const parcelaComTaxa=money(parcelaSemTaxa+tax);
+        const saldoAposPrimeira=money((fare+tax)-parcelaComTaxa);
+        lines.push(`${b}${card}*D${val}*A${auth}$${parcelaComTaxa.toFixed(2)}\nMSCCPL${String(p).padStart(2,'0')}X${ot}X${msplGalileoCartao}$${saldoAposPrimeira.toFixed(2)}`);
+      }
+   }
+ });
+ document.getElementById('cmd').textContent=lines.join('\n');
+}
+async function copyCmd(){try{await navigator.clipboard.writeText(document.getElementById('cmd').textContent);alert('Comando copiado.')}catch(e){alert('Não foi possível copiar automaticamente.')}}
+function clearForm(){document.querySelectorAll('#app input').forEach(x=>{if(['qAdt','parcelas'].includes(x.id))return;x.value=''});infCache={q:'0',t:'',x:''};document.getElementById('qAdt').value=1;document.getElementById('qChd').value=0;document.getElementById('qInf').value=0;document.getElementById('parcelas').value=1;document.getElementById('gds').value='';document.getElementById('cia').value='';document.getElementById('bandeira').value='';document.getElementById('forma').value='CARTAO';toggleForma();document.getElementById('cmd').textContent='Preencha os campos obrigatórios para gerar o comando.';updateAll()}
+toggleForma();updateAll();
+</script>
+</body></html>
+```
