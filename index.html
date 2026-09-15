@@ -9,13 +9,24 @@
 *{box-sizing:border-box}
 body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:linear-gradient(#e2e8f0,#f8fafc);color:var(--text)}
 .screen{display:none;min-height:100vh} .screen.active{display:block}
-.login{min-height:100vh;display:grid;place-items:center;padding:24px}
-.login-card{width:min(430px,100%);background:white;padding:30px;border-radius:18px;box-shadow:0 18px 45px #0f172a20}
-.brand{display:flex;gap:12px;align-items:center;margin-bottom:22px} .logo{width:46px;height:46px;border-radius:12px;background:var(--navy);color:white;display:grid;place-items:center;font-weight:800}
+.login{min-height:100vh;display:grid;place-items:center;padding:32px;background:radial-gradient(circle at 15% 20%,#2563eb38,transparent 28%),linear-gradient(135deg,#071426 0%,#0f2747 54%,#173b68 100%)}
+.login-shell{width:min(960px,100%);display:grid;grid-template-columns:1.05fr .95fr;background:#ffffff0d;border:1px solid #ffffff1f;border-radius:24px;overflow:hidden;box-shadow:0 30px 80px #02061766;backdrop-filter:blur(12px)}
+.login-hero{padding:54px;color:white;display:flex;flex-direction:column;justify-content:space-between;min-height:570px}
+.login-hero h2{font-size:36px;line-height:1.15;margin:28px 0 16px;max-width:430px}.login-hero p{color:#cbd5e1;line-height:1.65;max-width:430px}
+.login-features{display:grid;gap:13px;color:#dbeafe;font-size:14px}.login-feature{display:flex;align-items:center;gap:10px}.login-check{width:23px;height:23px;border-radius:50%;background:#2563eb;display:grid;place-items:center;font-size:12px;font-weight:900}
+.login-card{width:100%;background:white;padding:52px 46px;display:flex;flex-direction:column;justify-content:center}
+.brand{display:flex;gap:12px;align-items:center;margin-bottom:30px}.logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--blue),#1d4ed8);color:white;display:grid;place-items:center;font-weight:800;box-shadow:0 10px 24px #2563eb45}
+.login-title{font-size:27px;color:var(--navy);margin-bottom:8px}.login-subtitle{margin-bottom:28px;line-height:1.5}
+.login-card input{height:48px;border-radius:11px;font-size:15px;transition:border-color .2s,box-shadow .2s}.login-card input:focus{outline:0;border-color:var(--blue);box-shadow:0 0 0 4px #2563eb1a}
+.password-wrap{position:relative}.password-wrap input{padding-right:48px}.password-toggle{position:absolute;right:5px;top:5px;width:38px;height:38px;border:0;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer;font-size:19px}.password-toggle:hover{background:#f1f5f9;color:var(--navy)}
+.login-options{display:flex;justify-content:flex-end;margin:-4px 0 18px}.login-link{border:0;background:transparent;padding:0;color:var(--blue);font-weight:700;font-size:13px;cursor:pointer}.login-link:hover{text-decoration:underline}
+.login-submit{width:100%;height:48px;display:flex;align-items:center;justify-content:center;gap:9px;font-size:15px;transition:transform .15s,background .2s}.login-submit:hover:not(:disabled){background:#1d4ed8;transform:translateY(-1px)}.login-submit:disabled{opacity:.7;cursor:wait}
+.spinner{width:17px;height:17px;border:2px solid #ffffff66;border-top-color:white;border-radius:50%;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.login-error{min-height:20px;margin:0 0 12px;color:var(--red);font-size:13px;font-weight:700}.login-error.success{color:var(--green)}
+.login-footer{margin:24px 0 0;text-align:center;color:var(--muted);font-size:12px;line-height:1.5}
 h1,h2,h3,p{margin-top:0} .muted{color:var(--muted)} .small{font-size:12px}
 label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
 input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:9px;padding:0 11px;background:white}
-.login-error{min-height:18px;margin:0 0 12px;color:var(--red);font-size:13px;font-weight:700}
 .field{margin-bottom:15px} .btn{border:0;border-radius:9px;padding:11px 15px;font-weight:700;cursor:pointer}
 .primary{background:var(--blue);color:white} .secondary{background:white;border:1px solid var(--line);color:var(--text)} .danger{background:var(--red);color:white}
 .top{background:linear-gradient(135deg,var(--navy),var(--navy2));color:white;padding:20px 26px;display:flex;justify-content:space-between;align-items:center}
@@ -37,20 +48,36 @@ input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:9
 .actions{display:flex;gap:9px;margin-top:12px}
 .summary{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:14px 0}
 .stat{background:#111c32;border:1px solid #263650;border-radius:9px;padding:10px} .stat small{display:block;color:#94a3b8} .stat strong{display:block;margin-top:4px}
-@media(max-width:850px){.grid3,.grid2,.passengers,.summary{grid-template-columns:1fr}}
+@media(max-width:850px){.grid3,.grid2,.passengers,.summary{grid-template-columns:1fr}.login{padding:18px}.login-shell{display:block;max-width:470px}.login-hero{display:none}.login-card{padding:38px 28px;min-height:calc(100vh - 36px)}}
+@media(max-width:420px){.login{padding:0}.login-shell{border:0;border-radius:0;min-height:100vh}.login-card{padding:32px 22px;min-height:100vh}.login-title{font-size:24px}}
 </style>
 </head>
 <body>
 <section id="login" class="screen active">
-<div class="login"><div class="login-card">
-<div class="brand"><div class="logo">FE</div><div><h1 style="margin-bottom:4px">Facilitador de Emissão</h1><div class="muted">Beta 1.0</div></div></div>
+<div class="login"><div class="login-shell">
+<aside class="login-hero" aria-hidden="true">
+<div><div class="logo">FE</div><h2>Emissões mais simples, rápidas e seguras.</h2><p>Centralize os dados e gere comandos para os principais sistemas GDS em poucos passos.</p></div>
+<div class="login-features"><div class="login-feature"><span class="login-check">✓</span> Amadeus, Sabre e Galileo</div><div class="login-feature"><span class="login-check">✓</span> Cálculos automáticos</div><div class="login-feature"><span class="login-check">✓</span> Acesso protegido por empresa</div></div>
+</aside>
+<div class="login-card">
+<div class="brand"><div class="logo">FE</div><div><strong>Facilitador de Emissão</strong><div class="muted small">BETA 1.0</div></div></div>
+<h1 class="login-title">Bem-vindo</h1><p id="loginSubtitle" class="muted login-subtitle">Entre com sua conta para continuar.</p>
 <form id="loginForm" onsubmit="login(event)">
 <div class="field"><label for="loginUser">E-mail</label><input id="loginUser" type="email" autocomplete="username" placeholder="nome@empresa.com" required autofocus></div>
-<div class="field"><label for="loginPassword">Senha</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••" required></div>
+<div class="field"><label for="loginPassword">Senha</label><div class="password-wrap"><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Digite sua senha" required><button class="password-toggle" type="button" onclick="togglePassword()" aria-label="Mostrar senha" title="Mostrar senha"><span id="passwordEye" aria-hidden="true">◉</span></button></div></div>
+<div class="login-options"><button class="login-link" type="button" onclick="resetPassword()">Esqueci minha senha</button></div>
 <div id="loginError" class="login-error" role="alert" aria-live="polite"></div>
-<button class="btn primary" style="width:100%" type="submit">Entrar</button>
+<button class="btn primary login-submit" type="submit"><span class="button-loader hidden" aria-hidden="true"></span><span class="button-label">Entrar</span></button>
 </form>
-</div></div>
+<form id="passwordForm" class="hidden" onsubmit="updatePassword(event)">
+<p class="muted login-subtitle">Crie uma nova senha para sua conta.</p>
+<div class="field"><label for="newPassword">Nova senha</label><input id="newPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Mínimo de 8 caracteres" required></div>
+<div class="field"><label for="confirmPassword">Confirmar nova senha</label><input id="confirmPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Digite a senha novamente" required></div>
+<div id="passwordError" class="login-error" role="alert" aria-live="polite"></div>
+<button class="btn primary login-submit" type="submit">Salvar nova senha</button>
+</form>
+<p class="login-footer">Acesso exclusivo para usuários autorizados.<br>Em caso de dúvidas, procure o administrador da sua empresa.</p>
+</div></div></div>
 </section>
 
 <section id="app" class="screen">
@@ -173,18 +200,82 @@ const supabaseClient=hasSupabaseConfiguration&&window.supabase
  ?window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY):null;
 
 function showScreen(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0)}
+function setLoginMessage(message,type='error'){
+ const element=document.getElementById('loginError');
+ element.textContent=message;
+ element.classList.toggle('success',type==='success');
+}
+function setLoginLoading(loading){
+ const button=document.querySelector('#loginForm button[type="submit"]');
+ button.disabled=loading;
+ button.setAttribute('aria-busy',String(loading));
+ button.querySelector('.button-label').textContent=loading?'Entrando...':'Entrar';
+ const loader=button.querySelector('.button-loader');
+ loader.classList.toggle('hidden',!loading);
+ loader.classList.toggle('spinner',loading);
+}
+function togglePassword(){
+ const input=document.getElementById('loginPassword');
+ const button=document.querySelector('.password-toggle');
+ const showing=input.type==='text';
+ input.type=showing?'password':'text';
+ button.setAttribute('aria-label',showing?'Mostrar senha':'Ocultar senha');
+ button.title=showing?'Mostrar senha':'Ocultar senha';
+ document.getElementById('passwordEye').textContent=showing?'◉':'⊘';
+ input.focus();
+}
+async function resetPassword(){
+ const email=document.getElementById('loginUser').value.trim();
+ if(!supabaseClient){setLoginMessage('A conexão com o Supabase não está configurada.');return}
+ if(!email){setLoginMessage('Informe seu e-mail para recuperar a senha.');document.getElementById('loginUser').focus();return}
+ if(!document.getElementById('loginUser').checkValidity()){setLoginMessage('Informe um endereço de e-mail válido.');document.getElementById('loginUser').focus();return}
+ setLoginMessage('Enviando instruções...','success');
+ try{
+   const redirectTo=new URL('.',window.location.href).href;
+   const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo});
+   if(error)throw error;
+   setLoginMessage('Se o e-mail estiver cadastrado, você receberá as instruções para redefinir a senha.','success');
+ }catch(_error){setLoginMessage('Não foi possível enviar as instruções. Tente novamente.')}
+}
+function showPasswordRecovery(){
+ showScreen('login');
+ document.querySelector('.login-title').textContent='Redefinir senha';
+ document.getElementById('loginSubtitle').classList.add('hidden');
+ document.getElementById('loginForm').classList.add('hidden');
+ document.getElementById('passwordForm').classList.remove('hidden');
+ document.getElementById('newPassword').focus();
+}
+async function updatePassword(event){
+ event.preventDefault();
+ const password=document.getElementById('newPassword').value;
+ const confirmation=document.getElementById('confirmPassword').value;
+ const message=document.getElementById('passwordError');
+ if(password!==confirmation){message.textContent='As senhas não coincidem.';return}
+ const button=document.querySelector('#passwordForm button[type="submit"]');
+ button.disabled=true;button.textContent='Salvando...';message.textContent='';
+ try{
+   const {error}=await supabaseClient.auth.updateUser({password});
+   if(error)throw error;
+   await supabaseClient.auth.signOut();
+   document.getElementById('passwordForm').classList.add('hidden');
+   document.getElementById('loginForm').classList.remove('hidden');
+   document.getElementById('loginSubtitle').classList.remove('hidden');
+   document.querySelector('.login-title').textContent='Bem-vindo';
+   setLoginMessage('Senha alterada. Entre com sua nova senha.','success');
+ }catch(_error){message.textContent='Não foi possível alterar a senha. Solicite um novo link.'}
+ finally{button.disabled=false;button.textContent='Salvar nova senha'}
+}
 async function login(event){
  event.preventDefault();
  const email=document.getElementById('loginUser').value.trim();
  const password=document.getElementById('loginPassword').value;
- const error=document.getElementById('loginError');
- if(!supabaseClient){error.textContent='Configure a conexão com o Supabase para entrar.';return}
- error.textContent='';
- const button=document.querySelector('#loginForm button[type="submit"]');
- button.disabled=true;button.textContent='Entrando...';
- const {error:authError}=await supabaseClient.auth.signInWithPassword({email,password});
- button.disabled=false;button.textContent='Entrar';
- if(authError){error.textContent='E-mail ou senha incorretos.';document.getElementById('loginPassword').value='';document.getElementById('loginPassword').focus()}
+ if(!supabaseClient){setLoginMessage('A conexão com o Supabase não está configurada.');return}
+ setLoginMessage('');setLoginLoading(true);
+ try{
+   const {error:authError}=await supabaseClient.auth.signInWithPassword({email,password});
+   if(authError){setLoginMessage('E-mail ou senha incorretos.');document.getElementById('loginPassword').value='';document.getElementById('loginPassword').focus()}
+ }catch(_error){setLoginMessage('Não foi possível conectar. Verifique sua internet e tente novamente.')}
+ finally{setLoginLoading(false)}
 }
 async function logout(){
  if(supabaseClient)await supabaseClient.auth.signOut();
@@ -217,9 +308,17 @@ async function applySession(session){
 }
 async function initializeAuthentication(){
  if(!supabaseClient){document.getElementById('loginError').textContent='Configure o Supabase em supabase-config.js para ativar o acesso.';return}
+ let recoveryMode=new URLSearchParams(window.location.hash.slice(1)).get('type')==='recovery';
+ supabaseClient.auth.onAuthStateChange((event,nextSession)=>{
+   if(event==='PASSWORD_RECOVERY'){
+     recoveryMode=true;
+     setTimeout(showPasswordRecovery,0);
+     return;
+   }
+   if(!recoveryMode)setTimeout(()=>applySession(nextSession),0);
+ });
  const {data:{session}}=await supabaseClient.auth.getSession();
- await applySession(session);
- supabaseClient.auth.onAuthStateChange((_event,nextSession)=>{setTimeout(()=>applySession(nextSession),0)});
+ if(recoveryMode)showPasswordRecovery();else await applySession(session);
 }
 function n(id){return parseFloat(document.getElementById(id).value)||0}
 function i(id){return parseInt(document.getElementById(id).value)||0}
