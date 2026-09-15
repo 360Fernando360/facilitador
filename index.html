@@ -19,7 +19,7 @@ body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:linear-gradient(#
 .login-title{font-size:27px;color:var(--navy);margin-bottom:8px}.login-subtitle{margin-bottom:28px;line-height:1.5}
 .login-card input{height:48px;border-radius:11px;font-size:15px;transition:border-color .2s,box-shadow .2s}.login-card input:focus{outline:0;border-color:var(--blue);box-shadow:0 0 0 4px #2563eb1a}
 .password-wrap{position:relative}.password-wrap input{padding-right:48px}.password-toggle{position:absolute;right:5px;top:5px;width:38px;height:38px;border:0;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer;font-size:19px}.password-toggle:hover{background:#f1f5f9;color:var(--navy)}
-.login-options{display:flex;justify-content:flex-end;margin:-4px 0 18px}.login-link{border:0;background:transparent;padding:0;color:var(--blue);font-weight:700;font-size:13px;cursor:pointer}.login-link:hover{text-decoration:underline}
+.login-options{display:flex;justify-content:flex-end;margin:-4px 0 18px}.login-link{border:0;background:transparent;padding:0;color:var(--blue);font-weight:700;font-size:13px;cursor:pointer}.login-link:hover:not(:disabled){text-decoration:underline}.login-link:disabled{opacity:.65;cursor:wait}
 .login-submit{width:100%;height:48px;display:flex;align-items:center;justify-content:center;gap:9px;font-size:15px;transition:transform .15s,background .2s}.login-submit:hover:not(:disabled){background:#1d4ed8;transform:translateY(-1px)}.login-submit:disabled{opacity:.7;cursor:wait}
 .spinner{width:17px;height:17px;border:2px solid #ffffff66;border-top-color:white;border-radius:50%;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 .login-error{min-height:20px;margin:0 0 12px;color:var(--red);font-size:13px;font-weight:700}.login-error.success{color:var(--green)}
@@ -227,16 +227,24 @@ function togglePassword(){
 }
 async function resetPassword(){
  const email=document.getElementById('loginUser').value.trim();
+ const resetButton=document.querySelector('.login-link');
  if(!supabaseClient){setLoginMessage('A conexão com o Supabase não está configurada.');return}
  if(!email){setLoginMessage('Informe seu e-mail para recuperar a senha.');document.getElementById('loginUser').focus();return}
  if(!document.getElementById('loginUser').checkValidity()){setLoginMessage('Informe um endereço de e-mail válido.');document.getElementById('loginUser').focus();return}
+ resetButton.disabled=true;resetButton.textContent='Enviando...';
  setLoginMessage('Enviando instruções...','success');
  try{
    const redirectTo=new URL('.',window.location.href).href;
    const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo});
    if(error)throw error;
    setLoginMessage('Se o e-mail estiver cadastrado, você receberá as instruções para redefinir a senha.','success');
- }catch(_error){setLoginMessage('Não foi possível enviar as instruções. Tente novamente.')}
+ }catch(error){
+   const rateLimited=error.code==='over_email_send_rate_limit'||error.code==='over_request_rate_limit'||error.status===429;
+   if(rateLimited)setLoginMessage('Limite temporário de envios atingido. Aguarde alguns minutos antes de tentar novamente.');
+   else setLoginMessage('Não foi possível enviar as instruções. Tente novamente mais tarde.');
+ }finally{
+   resetButton.disabled=false;resetButton.textContent='Esqueci minha senha';
+ }
 }
 function showPasswordRecovery(){
  showScreen('login');
