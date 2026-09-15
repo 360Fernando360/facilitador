@@ -198,6 +198,7 @@ const SUPABASE_PUBLISHABLE_KEY=window.SUPABASE_CONFIG?.publishableKey||'';
 const hasSupabaseConfiguration=SUPABASE_URL.startsWith('https://')&&!SUPABASE_URL.includes('COLE_AQUI')&&SUPABASE_PUBLISHABLE_KEY&&!SUPABASE_PUBLISHABLE_KEY.includes('COLE_AQUI');
 const supabaseClient=hasSupabaseConfiguration&&window.supabase
  ?window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY):null;
+let recoveryMode=false;
 
 function showScreen(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0)}
 function setLoginMessage(message,type='error'){
@@ -255,7 +256,13 @@ async function updatePassword(event){
  button.disabled=true;button.textContent='Salvando...';message.textContent='';
  try{
    const {error}=await supabaseClient.auth.updateUser({password});
-   if(error)throw error;
+   if(error){
+     const samePassword=error.code==='same_password'||/same password|different from.*password/i.test(error.message||'');
+     if(samePassword){message.textContent='A nova senha precisa ser diferente da senha anterior.';return}
+     throw error;
+   }
+   recoveryMode=false;
+   history.replaceState({},document.title,window.location.pathname);
    await supabaseClient.auth.signOut();
    document.getElementById('passwordForm').classList.add('hidden');
    document.getElementById('loginForm').classList.remove('hidden');
@@ -308,7 +315,7 @@ async function applySession(session){
 }
 async function initializeAuthentication(){
  if(!supabaseClient){document.getElementById('loginError').textContent='Configure o Supabase em supabase-config.js para ativar o acesso.';return}
- let recoveryMode=new URLSearchParams(window.location.hash.slice(1)).get('type')==='recovery';
+ recoveryMode=new URLSearchParams(window.location.hash.slice(1)).get('type')==='recovery';
  supabaseClient.auth.onAuthStateChange((event,nextSession)=>{
    if(event==='PASSWORD_RECOVERY'){
      recoveryMode=true;
