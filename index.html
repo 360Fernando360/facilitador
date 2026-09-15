@@ -1,4 +1,3 @@
-```
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -16,6 +15,7 @@ body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:linear-gradient(#
 h1,h2,h3,p{margin-top:0} .muted{color:var(--muted)} .small{font-size:12px}
 label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
 input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:9px;padding:0 11px;background:white}
+.login-error{min-height:18px;margin:0 0 12px;color:var(--red);font-size:13px;font-weight:700}
 .field{margin-bottom:15px} .btn{border:0;border-radius:9px;padding:11px 15px;font-weight:700;cursor:pointer}
 .primary{background:var(--blue);color:white} .secondary{background:white;border:1px solid var(--line);color:var(--text)} .danger{background:var(--red);color:white}
 .top{background:linear-gradient(135deg,var(--navy),var(--navy2));color:white;padding:20px 26px;display:flex;justify-content:space-between;align-items:center}
@@ -44,15 +44,17 @@ input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:9
 <section id="login" class="screen active">
 <div class="login"><div class="login-card">
 <div class="brand"><div class="logo">FE</div><div><h1 style="margin-bottom:4px">Facilitador de Emissão</h1><div class="muted">Beta 1.0</div></div></div>
-<div class="field"><label>Usuário ou e-mail</label><input placeholder="seu.usuario"></div>
-<div class="field"><label>Senha</label><input type="password" placeholder="••••••••"></div>
-<button class="btn primary" style="width:100%" onclick="go('app')">Entrar</button>
-<p class="small muted" style="margin-top:14px">Protótipo: o login ainda não possui autenticação real.</p>
+<form id="loginForm" onsubmit="login(event)">
+<div class="field"><label for="loginUser">Usuário ou e-mail</label><input id="loginUser" autocomplete="username" placeholder="seu.usuario" required autofocus></div>
+<div class="field"><label for="loginPassword">Senha</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••" required></div>
+<div id="loginError" class="login-error" role="alert" aria-live="polite"></div>
+<button class="btn primary" style="width:100%" type="submit">Entrar</button>
+</form>
 </div></div>
 </section>
 
 <section id="app" class="screen">
-<header class="top"><div><strong>Facilitador de Emissão GDS</strong><div class="small" style="color:#94a3b8;margin-top:4px">Amadeus • Sabre • Galileo</div></div><div><span style="margin-right:12px">BETA 1.0</span><button class="btn secondary" onclick="go('login')">Sair</button></div></header>
+<header class="top"><div><strong>Facilitador de Emissão GDS</strong><div class="small" style="color:#94a3b8;margin-top:4px">Amadeus • Sabre • Galileo</div></div><div><span style="margin-right:12px">BETA 1.0</span><button class="btn secondary" onclick="logout()">Sair</button></div></header>
 <main class="wrap">
 <div class="notice"><strong>Privacidade:</strong> os dados do cartão são usados somente para compor o comando no navegador. Este protótipo não grava os dados.</div>
 
@@ -162,7 +164,34 @@ input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:9
 </section>
 
 <script>
-function go(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0)}
+// Altere estas duas credenciais antes de publicar o arquivo.
+const ACCESS_USER='admin';
+const ACCESS_PASSWORD='Emissao@2026';
+const SESSION_KEY='facilitador-authenticated';
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0)}
+function login(event){
+ event.preventDefault();
+ const user=document.getElementById('loginUser').value.trim();
+ const password=document.getElementById('loginPassword').value;
+ const error=document.getElementById('loginError');
+ if(user===ACCESS_USER&&password===ACCESS_PASSWORD){
+   sessionStorage.setItem(SESSION_KEY,'true');
+   error.textContent='';
+   document.getElementById('loginForm').reset();
+   showScreen('app');
+   return;
+ }
+ error.textContent='Usuário ou senha incorretos.';
+ document.getElementById('loginPassword').value='';
+ document.getElementById('loginPassword').focus();
+}
+function logout(){
+ sessionStorage.removeItem(SESSION_KEY);
+ document.getElementById('loginError').textContent='';
+ showScreen('login');
+ document.getElementById('loginUser').focus();
+}
 function n(id){return parseFloat(document.getElementById(id).value)||0}
 function i(id){return parseInt(document.getElementById(id).value)||0}
 function br(v){return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
@@ -299,6 +328,7 @@ function generate(){
 async function copyCmd(){try{await navigator.clipboard.writeText(document.getElementById('cmd').textContent);alert('Comando copiado.')}catch(e){alert('Não foi possível copiar automaticamente.')}}
 function clearForm(){document.querySelectorAll('#app input').forEach(x=>{if(['qAdt','parcelas'].includes(x.id))return;x.value=''});infCache={q:'0',t:'',x:''};document.getElementById('qAdt').value=1;document.getElementById('qChd').value=0;document.getElementById('qInf').value=0;document.getElementById('parcelas').value=1;document.getElementById('gds').value='';document.getElementById('cia').value='';document.getElementById('bandeira').value='';document.getElementById('forma').value='CARTAO';toggleForma();document.getElementById('cmd').textContent='Preencha os campos obrigatórios para gerar o comando.';updateAll()}
 toggleForma();updateAll();
+if(sessionStorage.getItem(SESSION_KEY)==='true')showScreen('app');
+else showScreen('login');
 </script>
 </body></html>
-```
