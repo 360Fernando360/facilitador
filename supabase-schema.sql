@@ -13,7 +13,7 @@ create table if not exists public.organization_members (
   user_id uuid not null references auth.users(id) on delete cascade,
   full_name text,
   email text,
-  role text not null default 'member' check (role in ('admin','member')),
+  role text not null default 'member' check (role in ('admin','manager','member')),
   created_at timestamptz not null default now(),
   primary key (organization_id,user_id),
   unique (user_id)
@@ -22,6 +22,8 @@ create table if not exists public.organization_members (
 -- Compatibilidade para projetos que executaram uma versão anterior deste arquivo.
 alter table public.organization_members add column if not exists full_name text;
 alter table public.organization_members add column if not exists email text;
+alter table public.organization_members drop constraint if exists organization_members_role_check;
+alter table public.organization_members add constraint organization_members_role_check check (role in ('admin','manager','member'));
 
 create index if not exists organization_members_user_id_idx on public.organization_members(user_id);
 
@@ -37,9 +39,40 @@ create table if not exists public.emissions (
 
 create index if not exists emissions_organization_id_idx on public.emissions(organization_id);
 
+create table if not exists public.announcements (
+  id uuid primary key default gen_random_uuid(),
+  organization_id uuid not null references public.organizations(id) on delete cascade,
+  title text not null,
+  message text not null,
+  kind text not null default 'notice' check (kind in ('notice','reminder')),
+  event_date date,
+  created_by uuid not null references auth.users(id) on delete restrict,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists announcements_organization_id_idx on public.announcements(organization_id);
+create index if not exists announcements_event_date_idx on public.announcements(event_date);
+
+create table if not exists public.vacations (
+  id uuid primary key default gen_random_uuid(),
+  organization_id uuid not null references public.organizations(id) on delete cascade,
+  employee_name text not null,
+  start_date date not null,
+  end_date date not null,
+  notes text,
+  created_by uuid not null references auth.users(id) on delete restrict,
+  created_at timestamptz not null default now(),
+  check (end_date >= start_date)
+);
+
+create index if not exists vacations_organization_id_idx on public.vacations(organization_id);
+create index if not exists vacations_dates_idx on public.vacations(start_date,end_date);
+
 alter table public.organizations enable row level security;
 alter table public.organization_members enable row level security;
 alter table public.emissions enable row level security;
+alter table public.announcements enable row level security;
+alter table public.vacations enable row level security;
 
 -- A função evita recursão entre as políticas de organizações e membros.
 create or replace function public.current_organization_ids()
@@ -77,6 +110,25 @@ $$;
 revoke all on function public.is_organization_admin(uuid) from public;
 grant execute on function public.is_organization_admin(uuid) to authenticated;
 
+create or replace function public.can_manage_organization(target_organization_id uuid)
+returns boolean
+language sql
+security definer
+set search_path = ''
+stable
+as $$
+  select exists (
+    select 1
+    from public.organization_members
+    where user_id = (select auth.uid())
+      and organization_id = target_organization_id
+      and role in ('admin','manager')
+  )
+$$;
+
+revoke all on function public.can_manage_organization(uuid) from public;
+grant execute on function public.can_manage_organization(uuid) to authenticated;
+
 drop policy if exists "members can read their organization" on public.organizations;
 create policy "members can read their organization"
 on public.organizations for select to authenticated
@@ -90,7 +142,7 @@ using (user_id = (select auth.uid()));
 drop policy if exists "admins can read organization members" on public.organization_members;
 create policy "admins can read organization members"
 on public.organization_members for select to authenticated
-using (public.is_organization_admin(organization_id));
+using (public.can_manage_organization(organization_id));
 
 drop policy if exists "members can read their emissions" on public.emissions;
 create policy "members can read their emissions"
@@ -104,6 +156,42 @@ with check (
   created_by = (select auth.uid())
   and organization_id in (select public.current_organization_ids())
 );
+
+drop policy if exists "members can read announcements" on public.announcements;
+create policy "members can read announcements"
+on public.announcements for select to authenticated
+using (organization_id in (select public.current_organization_ids()));
+
+drop policy if exists "managers can create announcements" on public.announcements;
+create policy "managers can create announcements"
+on public.announcements for insert to authenticated
+with check (
+  created_by = (select auth.uid())
+  and public.can_manage_organization(organization_id)
+);
+
+drop policy if exists "managers can delete announcements" on public.announcements;
+create policy "managers can delete announcements"
+on public.announcements for delete to authenticated
+using (public.can_manage_organization(organization_id));
+
+drop policy if exists "members can read vacations" on public.vacations;
+create policy "members can read vacations"
+on public.vacations for select to authenticated
+using (organization_id in (select public.current_organization_ids()));
+
+drop policy if exists "managers can create vacations" on public.vacations;
+create policy "managers can create vacations"
+on public.vacations for insert to authenticated
+with check (
+  created_by = (select auth.uid())
+  and public.can_manage_organization(organization_id)
+);
+
+drop policy if exists "managers can delete vacations" on public.vacations;
+create policy "managers can delete vacations"
+on public.vacations for delete to authenticated
+using (public.can_manage_organization(organization_id));
 
 -- Exemplo de provisionamento (crie o usuário em Authentication > Users primeiro):
 -- insert into public.organizations (name,slug) values ('Empresa Exemplo','empresa-exemplo');

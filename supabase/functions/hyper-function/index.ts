@@ -49,7 +49,7 @@ Deno.serve(async (request) => {
 
   const fullName = payload.fullName?.trim()
   const email = payload.email?.trim().toLowerCase()
-  const role = payload.role === 'admin' ? 'admin' : 'member'
+  const role = ['admin', 'manager'].includes(payload.role ?? '') ? payload.role! : 'member'
   const redirectTo = 'https://360fernando360.github.io/facilitador/'
   if (!fullName || fullName.length < 2) return json({ error: 'Informe o nome completo.' }, 400)
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: 'Informe um e-mail válido.' }, 400)

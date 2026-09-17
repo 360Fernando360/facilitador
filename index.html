@@ -53,7 +53,17 @@ input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:9
 .admin-form{display:grid;grid-template-columns:1.2fr 1.4fr .8fr auto;gap:12px;align-items:end;padding:18px;background:white;border:1px solid var(--line);border-radius:12px}.admin-form .field{margin:0}.admin-form .btn{height:42px}
 .admin-message{min-height:20px;margin:12px 0 0;font-size:13px;font-weight:700}.admin-message.error{color:var(--red)}.admin-message.success{color:var(--green)}
 .member-list{margin-top:20px;display:grid;gap:9px}.member-row{display:grid;grid-template-columns:1.2fr 1.5fr .7fr;gap:12px;align-items:center;padding:13px 15px;background:white;border:1px solid var(--line);border-radius:10px}.member-name{font-weight:800;color:var(--navy)}.role-badge{justify-self:start;padding:5px 9px;border-radius:999px;background:#e2e8f0;font-size:11px;font-weight:800;text-transform:uppercase}.role-badge.admin{background:#dbeafe;color:#1d4ed8}.empty-members{text-align:center;padding:22px;color:var(--muted)}
-@media(max-width:850px){.grid3,.grid2,.passengers,.summary,.admin-form{grid-template-columns:1fr}.login{padding:18px}.login-shell{display:block;max-width:470px}.login-hero{display:none}.login-card{padding:38px 28px;min-height:calc(100vh - 36px)}.top{align-items:flex-start;gap:14px}.top>div:last-child{text-align:right}.member-row{grid-template-columns:1fr}.role-badge{justify-self:start}}
+.role-badge.manager{background:#fef3c7;color:#92400e}
+.module-nav{background:white;border-bottom:1px solid var(--line);display:flex;gap:5px;padding:10px max(18px,calc((100% - 1150px)/2));overflow-x:auto;position:sticky;top:0;z-index:10}.nav-button{white-space:nowrap;border:0;background:transparent;color:var(--muted);padding:10px 13px;border-radius:9px;font-weight:700;cursor:pointer}.nav-button:hover{background:#f1f5f9;color:var(--navy)}.nav-button.active{background:#dbeafe;color:#1d4ed8}
+.welcome-hero{background:linear-gradient(135deg,#0f172a,#1e3a5f);color:white;border-radius:18px;padding:30px;margin-bottom:18px;display:flex;justify-content:space-between;gap:20px;align-items:center}.welcome-hero h1{margin-bottom:8px}.welcome-hero p{margin:0;color:#cbd5e1}.welcome-date{background:#ffffff12;border:1px solid #ffffff26;border-radius:12px;padding:12px 15px;white-space:nowrap;text-align:center}
+.module-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}.module-card{border:1px solid var(--line);background:white;border-radius:13px;padding:18px;text-align:left;cursor:pointer;min-height:115px;transition:transform .15s,border-color .15s,box-shadow .15s}.module-card:hover{transform:translateY(-2px);border-color:#93c5fd;box-shadow:0 10px 25px #0f172a12}.module-icon{display:block;font-size:23px;margin-bottom:13px}.module-card strong{display:block;color:var(--navy)}.module-card small{display:block;color:var(--muted);margin-top:5px}
+.dashboard-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:18px}.panel-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}.panel-title h2{margin:0}
+.calendar-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.calendar-head button{border:0;background:#f1f5f9;width:34px;height:34px;border-radius:8px;cursor:pointer}.calendar-week,.calendar-days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.calendar-week span{text-align:center;font-size:11px;font-weight:800;color:var(--muted);padding:6px 0}.calendar-day{min-height:42px;border:1px solid transparent;border-radius:8px;padding:6px;font-size:12px;background:#f8fafc}.calendar-day.outside{opacity:.35}.calendar-day.today{background:#dbeafe;border-color:#60a5fa;color:#1d4ed8;font-weight:800}.calendar-day.has-event{box-shadow:inset 0 -3px #f59e0b}
+.feed-list{display:grid;gap:10px}.feed-item{border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:10px;padding:13px;background:#fff}.feed-item.reminder{border-left-color:#f59e0b}.feed-item h3{font-size:15px;margin-bottom:6px}.feed-item p{font-size:13px;line-height:1.5;margin-bottom:7px}.feed-meta{font-size:11px;color:var(--muted)}.feed-actions{display:flex;justify-content:flex-end}.icon-danger{border:0;background:transparent;color:var(--red);cursor:pointer;font-weight:700;font-size:12px}.vacation-item{display:flex;justify-content:space-between;gap:12px;align-items:center;background:#ecfdf5;border:1px solid #bbf7d0;border-radius:10px;padding:13px}.vacation-item strong{color:#166534}.vacation-dates{font-size:12px;color:#15803d;margin-top:4px}
+.manager-tools{margin-top:18px}.manager-forms{display:grid;grid-template-columns:1fr 1fr;gap:16px}.tool-form{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:16px}.tool-form textarea{width:100%;min-height:82px;border:1px solid var(--line);border-radius:9px;padding:10px;font:inherit;resize:vertical}.tool-form textarea:focus{outline:0;border-color:var(--blue);box-shadow:0 0 0 4px #2563eb1a}
+.placeholder-page{text-align:center;padding:70px 24px}.placeholder-icon{font-size:48px;margin-bottom:18px}.placeholder-page h1{color:var(--navy)}
+@media(max-width:1000px){.module-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:850px){.grid3,.grid2,.passengers,.summary,.admin-form,.dashboard-grid,.manager-forms{grid-template-columns:1fr}.login{padding:18px}.login-shell{display:block;max-width:470px}.login-hero{display:none}.login-card{padding:38px 28px;min-height:calc(100vh - 36px)}.top{align-items:flex-start;gap:14px}.top>div:last-child{text-align:right}.member-row{grid-template-columns:1fr}.role-badge{justify-self:start}.welcome-hero{align-items:flex-start;flex-direction:column}.module-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:420px){.login{padding:0}.login-shell{border:0;border-radius:0;min-height:100vh}.login-card{padding:32px 22px;min-height:100vh}.login-title{font-size:24px}}
 </style>
 </head>
@@ -86,21 +96,52 @@ input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:9
 </section>
 
 <section id="app" class="screen">
-<header class="top"><div><strong>Facilitador de Emissão GDS</strong><div class="small" style="color:#94a3b8;margin-top:4px">Amadeus • Sabre • Galileo</div></div><div><span id="companyName" class="small" style="margin-right:12px;color:#cbd5e1"></span><span style="margin-right:12px">BETA 1.0</span><button id="adminButton" class="btn secondary hidden" type="button" onclick="toggleAdminPanel()" style="margin-right:8px">Usuários</button><button class="btn secondary" onclick="logout()">Sair</button></div></header>
+<header class="top"><div><strong>Facilitador</strong><div class="small" style="color:#94a3b8;margin-top:4px">Portal operacional</div></div><div><span id="companyName" class="small" style="margin-right:12px;color:#cbd5e1"></span><span style="margin-right:12px">BETA 1.0</span><button id="adminButton" class="btn secondary hidden" type="button" onclick="showPage('admin')" style="margin-right:8px">Administração</button><button class="btn secondary" onclick="logout()">Sair</button></div></header>
+<nav class="module-nav" aria-label="Navegação principal">
+<button class="nav-button active" data-page="home" onclick="showPage('home')">Início</button>
+<button class="nav-button" data-page="emissao" onclick="showPage('emissao')">Emissão</button>
+<button class="nav-button" data-page="inter" onclick="showPage('inter')">Atendimento Inter</button>
+<button class="nav-button" data-page="nacional" onclick="showPage('nacional')">Atendimento Nacional</button>
+<button class="nav-button" data-page="plantao" onclick="showPage('plantao')">Plantão</button>
+<button class="nav-button" data-page="comercial" onclick="showPage('comercial')">Comercial</button>
+</nav>
 <main class="wrap">
-<div class="notice"><strong>Privacidade:</strong> os dados do cartão são usados somente para compor o comando no navegador. Este protótipo não grava os dados.</div>
-
-<section id="adminPanel" class="card admin-card hidden">
+<section id="page-admin" class="card admin-card app-page hidden">
 <div class="admin-heading"><div><h2>Administração de usuários</h2><p class="muted">Convide pessoas para acessar esta empresa.</p></div><button class="btn secondary" type="button" onclick="toggleAdminPanel(false)">Fechar</button></div>
 <form id="inviteForm" class="admin-form" onsubmit="inviteUser(event)">
 <div class="field"><label for="inviteName">Nome completo</label><input id="inviteName" autocomplete="name" placeholder="Nome do usuário" required></div>
 <div class="field"><label for="inviteEmail">E-mail</label><input id="inviteEmail" type="email" autocomplete="email" placeholder="nome@empresa.com" required></div>
-<div class="field"><label for="inviteRole">Perfil</label><select id="inviteRole"><option value="member">Usuário</option><option value="admin">Administrador</option></select></div>
+<div class="field"><label for="inviteRole">Perfil</label><select id="inviteRole"><option value="member">Colaborador</option><option value="manager">Gestor</option><option value="admin">Administrador</option></select></div>
 <button class="btn primary" type="submit">Enviar convite</button>
 </form>
 <div id="inviteMessage" class="admin-message" role="status" aria-live="polite"></div>
 <div id="memberList" class="member-list"><div class="empty-members">Carregando usuários...</div></div>
 </section>
+
+<section id="page-home" class="app-page">
+<div class="welcome-hero"><div><h1>Olá, <span id="welcomeName">colaborador</span>!</h1><p>Bem-vindo ao portal da sua equipe. Confira os avisos e acesse os módulos abaixo.</p></div><div id="welcomeDate" class="welcome-date"></div></div>
+<div class="module-grid">
+<button class="module-card" onclick="showPage('emissao')"><span class="module-icon">✈️</span><strong>Emissão</strong><small>Gerador de comandos GDS</small></button>
+<button class="module-card" onclick="showPage('inter')"><span class="module-icon">🌎</span><strong>Atendimento Inter</strong><small>Operações internacionais</small></button>
+<button class="module-card" onclick="showPage('nacional')"><span class="module-icon">🇧🇷</span><strong>Atendimento Nacional</strong><small>Operações domésticas</small></button>
+<button class="module-card" onclick="showPage('plantao')"><span class="module-icon">🕐</span><strong>Plantão</strong><small>Rotinas e contatos</small></button>
+<button class="module-card" onclick="showPage('comercial')"><span class="module-icon">💼</span><strong>Comercial</strong><small>Informações comerciais</small></button>
+</div>
+<div class="dashboard-grid">
+<div>
+<section class="card"><div class="panel-title"><h2>Recados e lembretes</h2></div><div id="announcementList" class="feed-list"><div class="empty-members">Nenhum recado publicado.</div></div></section>
+<section id="managerTools" class="card manager-tools hidden"><div class="panel-title"><h2>Publicar informações</h2><span class="role-badge manager">Gestão</span></div><div class="manager-forms">
+<form class="tool-form" onsubmit="createAnnouncement(event)"><h3>Novo recado ou lembrete</h3><div class="field"><label for="announcementKind">Tipo</label><select id="announcementKind"><option value="notice">Recado</option><option value="reminder">Lembrete</option></select></div><div class="field"><label for="announcementTitle">Título</label><input id="announcementTitle" required maxlength="100"></div><div class="field"><label for="announcementMessage">Mensagem</label><textarea id="announcementMessage" required maxlength="1000"></textarea></div><div class="field"><label for="announcementDate">Data relacionada (opcional)</label><input id="announcementDate" type="date"></div><button class="btn primary" type="submit">Publicar</button></form>
+<form class="tool-form" onsubmit="createVacation(event)"><h3>Informar férias</h3><div class="field"><label for="vacationEmployee">Colaborador</label><select id="vacationEmployee" required><option value="">Selecione</option></select></div><div class="grid2"><div class="field"><label for="vacationStart">Início</label><input id="vacationStart" type="date" required></div><div class="field"><label for="vacationEnd">Retorno</label><input id="vacationEnd" type="date" required></div></div><div class="field"><label for="vacationNotes">Observação (opcional)</label><input id="vacationNotes" maxlength="200"></div><button class="btn primary" type="submit">Adicionar férias</button></form>
+</div><div id="dashboardMessage" class="admin-message" role="status" aria-live="polite"></div></section>
+</div>
+<div><section class="card"><div class="calendar-head"><button type="button" onclick="changeCalendarMonth(-1)" aria-label="Mês anterior">‹</button><strong id="calendarTitle"></strong><button type="button" onclick="changeCalendarMonth(1)" aria-label="Próximo mês">›</button></div><div class="calendar-week"><span>DOM</span><span>SEG</span><span>TER</span><span>QUA</span><span>QUI</span><span>SEX</span><span>SÁB</span></div><div id="calendarDays" class="calendar-days"></div></section>
+<section class="card"><div class="panel-title"><h2>Quem está de férias</h2></div><div id="vacationList" class="feed-list"><div class="empty-members">Nenhuma férias informada.</div></div></section></div>
+</div>
+</section>
+
+<section id="page-emissao" class="app-page hidden">
+<div class="notice"><strong>Privacidade:</strong> os dados do cartão são usados somente para compor o comando no navegador. Este protótipo não grava os dados.</div>
 
 <section class="card">
 <h2>Dados da emissão</h2>
@@ -204,6 +245,12 @@ input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:9
 <div id="alert" style="color:#fca5a5;margin-top:9px;font-size:13px"></div>
 <div class="actions"><button class="btn primary" onclick="generate()">Gerar comando</button><button class="btn secondary" onclick="copyCmd()">Copiar comando</button><button class="btn danger" onclick="clearForm()">Limpar</button></div>
 </section>
+</section>
+
+<section id="page-inter" class="app-page hidden"><div class="card placeholder-page"><div class="placeholder-icon">🌎</div><h1>Atendimento Inter</h1><p class="muted">Este módulo está preparado para receber os processos e ferramentas do atendimento internacional.</p><button class="btn secondary" onclick="showPage('home')">Voltar ao início</button></div></section>
+<section id="page-nacional" class="app-page hidden"><div class="card placeholder-page"><div class="placeholder-icon">🇧🇷</div><h1>Atendimento Nacional</h1><p class="muted">Este módulo está preparado para receber os processos e ferramentas do atendimento nacional.</p><button class="btn secondary" onclick="showPage('home')">Voltar ao início</button></div></section>
+<section id="page-plantao" class="app-page hidden"><div class="card placeholder-page"><div class="placeholder-icon">🕐</div><h1>Plantão</h1><p class="muted">Este módulo está preparado para receber escalas, contatos e orientações de plantão.</p><button class="btn secondary" onclick="showPage('home')">Voltar ao início</button></div></section>
+<section id="page-comercial" class="app-page hidden"><div class="card placeholder-page"><div class="placeholder-icon">💼</div><h1>Comercial</h1><p class="muted">Este módulo está preparado para receber informações e rotinas comerciais.</p><button class="btn secondary" onclick="showPage('home')">Voltar ao início</button></div></section>
 </main>
 </section>
 
@@ -218,6 +265,9 @@ const supabaseClient=hasSupabaseConfiguration&&window.supabase
 let recoveryMode=false;
 let passwordFlow='recovery';
 let currentMembership=null;
+let currentUserId=null;
+let calendarCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+let dashboardEventDates=new Set();
 
 function showScreen(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0)}
 function setLoginMessage(message,type='error'){
@@ -316,8 +366,9 @@ async function login(event){
 async function logout(){
  if(supabaseClient)await supabaseClient.auth.signOut();
  currentMembership=null;
+ currentUserId=null;
  document.getElementById('adminButton').classList.add('hidden');
- document.getElementById('adminPanel').classList.add('hidden');
+ document.getElementById('page-admin').classList.add('hidden');
  document.getElementById('loginError').textContent='';
  showScreen('login');
  document.getElementById('loginUser').focus();
@@ -342,10 +393,14 @@ async function applySession(session){
    return;
  }
  currentMembership=membership;
+ currentUserId=session.user.id;
  document.getElementById('companyName').textContent=membership.organization.name;
+ document.getElementById('welcomeName').textContent=(membership.full_name||membership.email||'colaborador').split(' ')[0];
  document.getElementById('adminButton').classList.toggle('hidden',membership.role!=='admin');
+ document.getElementById('managerTools').classList.toggle('hidden',!['admin','manager'].includes(membership.role));
  document.getElementById('loginError').textContent='';
  showScreen('app');
+ showPage('home');
 }
 async function initializeAuthentication(){
  if(!supabaseClient){document.getElementById('loginError').textContent='Configure o Supabase em supabase-config.js para ativar o acesso.';return}
@@ -364,12 +419,19 @@ async function initializeAuthentication(){
  const {data:{session}}=await supabaseClient.auth.getSession();
  if(recoveryMode)showPasswordSetup(passwordFlow);else await applySession(session);
 }
+function showPage(page){
+ if(page==='admin'&&currentMembership?.role!=='admin')return;
+ document.querySelectorAll('.app-page').forEach(section=>section.classList.add('hidden'));
+ const target=document.getElementById(`page-${page}`);if(!target)return;
+ target.classList.remove('hidden');
+ document.querySelectorAll('.nav-button').forEach(button=>button.classList.toggle('active',button.dataset.page===page));
+ window.scrollTo({top:0,behavior:'smooth'});
+ if(page==='home')loadDashboard();
+ if(page==='admin')loadMembers();
+}
 function toggleAdminPanel(force){
- if(currentMembership?.role!=='admin')return;
- const panel=document.getElementById('adminPanel');
- const show=typeof force==='boolean'?force:panel.classList.contains('hidden');
- panel.classList.toggle('hidden',!show);
- if(show){loadMembers();panel.scrollIntoView({behavior:'smooth',block:'start'})}
+ if(force===false){showPage('home');return}
+ showPage('admin');
 }
 function setInviteMessage(message,type=''){
  const element=document.getElementById('inviteMessage');
@@ -382,7 +444,7 @@ function renderMembers(members){
    const row=document.createElement('div');row.className='member-row';
    const name=document.createElement('div');name.className='member-name';name.textContent=member.full_name||'Nome não informado';
    const email=document.createElement('div');email.className='muted';email.textContent=member.email||'E-mail não informado';
-   const role=document.createElement('span');role.className=`role-badge ${member.role}`;role.textContent=member.role==='admin'?'Administrador':'Usuário';
+   const role=document.createElement('span');role.className=`role-badge ${member.role}`;role.textContent=member.role==='admin'?'Administrador':member.role==='manager'?'Gestor':'Colaborador';
    row.append(name,email,role);list.appendChild(row);
  });
 }
@@ -413,6 +475,96 @@ async function inviteUser(event){
    else if(/rate|limit|429/i.test(message))setInviteMessage('Limite de e-mails atingido. Aguarde antes de enviar outro convite.','error');
    else setInviteMessage('Não foi possível enviar o convite. Verifique a configuração da função e tente novamente.','error');
  }finally{button.disabled=false;button.textContent='Enviar convite'}
+}
+function canManageDashboard(){return ['admin','manager'].includes(currentMembership?.role)}
+function localDate(value){return new Date(`${value}T12:00:00`)}
+function formatDate(value){return localDate(value).toLocaleDateString('pt-BR')}
+function setDashboardMessage(message,type=''){
+ const element=document.getElementById('dashboardMessage');element.textContent=message;element.className=`admin-message ${type}`.trim();
+}
+async function loadDashboard(){
+ if(!currentMembership)return;
+ const now=new Date();
+ document.getElementById('welcomeDate').innerHTML=`<strong>${now.toLocaleDateString('pt-BR',{weekday:'long'})}</strong><br><span class="small">${now.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</span>`;
+ const today=now.toISOString().slice(0,10);
+ const [announcementResult,vacationResult]=await Promise.all([
+   supabaseClient.from('announcements').select('id,title,message,kind,event_date,created_at').eq('organization_id',currentMembership.organization_id).order('created_at',{ascending:false}),
+   supabaseClient.from('vacations').select('id,employee_name,start_date,end_date,notes').eq('organization_id',currentMembership.organization_id).gte('end_date',today).order('start_date',{ascending:true})
+ ]);
+ renderAnnouncements(announcementResult.data||[],announcementResult.error);
+ renderVacations(vacationResult.data||[],vacationResult.error);
+ dashboardEventDates=new Set((announcementResult.data||[]).map(item=>item.event_date).filter(Boolean));
+ (vacationResult.data||[]).forEach(item=>{
+   const cursor=localDate(item.start_date),end=localDate(item.end_date);let guard=0;
+   while(cursor<=end&&guard<370){dashboardEventDates.add(cursor.toISOString().slice(0,10));cursor.setDate(cursor.getDate()+1);guard++}
+ });
+ renderCalendar();
+ if(canManageDashboard())await loadVacationEmployees();
+}
+function renderAnnouncements(items,error){
+ const list=document.getElementById('announcementList');list.replaceChildren();
+ if(error){list.innerHTML='<div class="empty-members">Não foi possível carregar os recados.</div>';return}
+ if(!items.length){list.innerHTML='<div class="empty-members">Nenhum recado publicado.</div>';return}
+ items.forEach(item=>{
+   const card=document.createElement('article');card.className=`feed-item ${item.kind}`;
+   const title=document.createElement('h3');title.textContent=item.title;
+   const message=document.createElement('p');message.textContent=item.message;
+   const meta=document.createElement('div');meta.className='feed-meta';meta.textContent=item.event_date?`${item.kind==='reminder'?'Lembrete':'Recado'} • ${formatDate(item.event_date)}`:(item.kind==='reminder'?'Lembrete':'Recado');
+   card.append(title,message,meta);
+   if(canManageDashboard()){const actions=document.createElement('div');actions.className='feed-actions';const remove=document.createElement('button');remove.className='icon-danger';remove.type='button';remove.textContent='Excluir';remove.onclick=()=>deleteAnnouncement(item.id);actions.appendChild(remove);card.appendChild(actions)}
+   list.appendChild(card);
+ });
+}
+function renderVacations(items,error){
+ const list=document.getElementById('vacationList');list.replaceChildren();
+ if(error){list.innerHTML='<div class="empty-members">Não foi possível carregar as férias.</div>';return}
+ if(!items.length){list.innerHTML='<div class="empty-members">Nenhuma férias informada.</div>';return}
+ items.forEach(item=>{
+   const card=document.createElement('div');card.className='vacation-item';const info=document.createElement('div');
+   const name=document.createElement('strong');name.textContent=item.employee_name;const dates=document.createElement('div');dates.className='vacation-dates';dates.textContent=`${formatDate(item.start_date)} a ${formatDate(item.end_date)}`;
+   info.append(name,dates);if(item.notes){const note=document.createElement('div');note.className='small muted';note.textContent=item.notes;info.appendChild(note)}card.appendChild(info);
+   if(canManageDashboard()){const remove=document.createElement('button');remove.className='icon-danger';remove.type='button';remove.textContent='Excluir';remove.onclick=()=>deleteVacation(item.id);card.appendChild(remove)}list.appendChild(card);
+ });
+}
+async function loadVacationEmployees(){
+ const select=document.getElementById('vacationEmployee');
+ const {data,error}=await supabaseClient.from('organization_members').select('full_name,email').eq('organization_id',currentMembership.organization_id).order('full_name',{ascending:true});
+ select.replaceChildren(new Option('Selecione',''));
+ if(error)return;
+ (data||[]).forEach(member=>select.add(new Option(member.full_name||member.email,member.full_name||member.email)));
+}
+async function createAnnouncement(event){
+ event.preventDefault();if(!canManageDashboard())return;
+ const form=event.currentTarget,button=form.querySelector('button[type="submit"]');button.disabled=true;setDashboardMessage('');
+ const payload={organization_id:currentMembership.organization_id,created_by:currentUserId,kind:document.getElementById('announcementKind').value,title:document.getElementById('announcementTitle').value.trim(),message:document.getElementById('announcementMessage').value.trim(),event_date:document.getElementById('announcementDate').value||null};
+ const {error}=await supabaseClient.from('announcements').insert(payload);button.disabled=false;
+ if(error){setDashboardMessage('Não foi possível publicar. Verifique se o SQL atualizado foi executado.','error');return}
+ form.reset();setDashboardMessage('Informação publicada para toda a equipe.','success');await loadDashboard();
+}
+async function createVacation(event){
+ event.preventDefault();if(!canManageDashboard())return;
+ const form=event.currentTarget,button=form.querySelector('button[type="submit"]');const start=document.getElementById('vacationStart').value,end=document.getElementById('vacationEnd').value;
+ if(end<start){setDashboardMessage('A data de retorno não pode ser anterior ao início.','error');return}
+ button.disabled=true;setDashboardMessage('');
+ const payload={organization_id:currentMembership.organization_id,created_by:currentUserId,employee_name:document.getElementById('vacationEmployee').value,start_date:start,end_date:end,notes:document.getElementById('vacationNotes').value.trim()||null};
+ const {error}=await supabaseClient.from('vacations').insert(payload);button.disabled=false;
+ if(error){setDashboardMessage('Não foi possível adicionar as férias.','error');return}
+ form.reset();setDashboardMessage('Férias publicadas para toda a equipe.','success');await loadDashboard();
+}
+async function deleteAnnouncement(id){
+ if(!canManageDashboard()||!confirm('Excluir este recado ou lembrete?'))return;
+ const {error}=await supabaseClient.from('announcements').delete().eq('id',id);if(error){setDashboardMessage('Não foi possível excluir.','error');return}await loadDashboard();
+}
+async function deleteVacation(id){
+ if(!canManageDashboard()||!confirm('Excluir esta informação de férias?'))return;
+ const {error}=await supabaseClient.from('vacations').delete().eq('id',id);if(error){setDashboardMessage('Não foi possível excluir.','error');return}await loadDashboard();
+}
+function changeCalendarMonth(offset){calendarCursor=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()+offset,1);renderCalendar()}
+function renderCalendar(){
+ const year=calendarCursor.getFullYear(),month=calendarCursor.getMonth(),today=new Date();
+ document.getElementById('calendarTitle').textContent=calendarCursor.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+ const grid=document.getElementById('calendarDays');grid.replaceChildren();const first=new Date(year,month,1);const start=new Date(year,month,1-first.getDay());
+ for(let index=0;index<42;index++){const date=new Date(start);date.setDate(start.getDate()+index);const cell=document.createElement('div');cell.className='calendar-day';cell.textContent=date.getDate();if(date.getMonth()!==month)cell.classList.add('outside');if(date.toDateString()===today.toDateString())cell.classList.add('today');const key=`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;if(dashboardEventDates.has(key))cell.classList.add('has-event');grid.appendChild(cell)}
 }
 function n(id){return parseFloat(document.getElementById(id).value)||0}
 function i(id){return parseInt(document.getElementById(id).value)||0}
