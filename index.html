@@ -461,7 +461,17 @@ async function initializeAuthentication(){
      setTimeout(()=>showPasswordSetup('recovery'),0);
      return;
    }
-   if(!recoveryMode)setTimeout(()=>applySession(nextSession),0);
+   if(recoveryMode)return;
+   if(event==='SIGNED_OUT'){
+     setTimeout(()=>applySession(null),0);
+     return;
+   }
+   if(event==='SIGNED_IN'){
+     // O Supabase pode repetir SIGNED_IN ao voltar para esta aba. Nesse caso,
+     // a aplicação já está montada e a página em uso deve ser preservada.
+     if(nextSession?.user.id===currentUserId&&currentMembership)return;
+     setTimeout(()=>applySession(nextSession),0);
+   }
  });
  const {data:{session}}=await supabaseClient.auth.getSession();
  if(recoveryMode)showPasswordSetup(passwordFlow);else await applySession(session);
