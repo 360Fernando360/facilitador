@@ -55,7 +55,7 @@ input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:9
 .member-list{margin-top:20px;display:grid;gap:9px}.member-row{display:grid;grid-template-columns:1.2fr 1.5fr .7fr;gap:12px;align-items:center;padding:13px 15px;background:white;border:1px solid var(--line);border-radius:10px}.member-name{font-weight:800;color:var(--navy)}.role-badge{justify-self:start;padding:5px 9px;border-radius:999px;background:#e2e8f0;font-size:11px;font-weight:800;text-transform:uppercase}.role-badge.admin{background:#dbeafe;color:#1d4ed8}.empty-members{text-align:center;padding:22px;color:var(--muted)}
 .role-badge.manager{background:#fef3c7;color:#92400e}
 .usage-panel{margin-top:24px;padding-top:22px;border-top:1px solid #bfdbfe}.usage-heading{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:14px}.usage-heading h3{margin:0;color:var(--navy)}.usage-heading p{margin:4px 0 0}.usage-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}.usage-stat{background:white;border:1px solid var(--line);border-radius:11px;padding:14px}.usage-stat span{display:block;color:var(--muted);font-size:12px;font-weight:700}.usage-stat strong{display:block;color:var(--navy);font-size:22px;margin-top:5px}.usage-table-wrap{overflow-x:auto;background:white;border:1px solid var(--line);border-radius:11px}.usage-table{width:100%;border-collapse:collapse;min-width:760px}.usage-table th,.usage-table td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--line);font-size:13px}.usage-table th{background:#f8fafc;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em}.usage-table tr:last-child td{border-bottom:0}.presence{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:12px}.presence::before{content:'';width:8px;height:8px;border-radius:50%;background:#94a3b8}.presence.online{color:#15803d}.presence.online::before{background:#22c55e;box-shadow:0 0 0 3px #dcfce7}.usage-empty{text-align:center!important;color:var(--muted);padding:22px!important}
-.module-nav{background:white;border-bottom:1px solid var(--line);display:flex;gap:5px;padding:10px max(18px,calc((100% - 1150px)/2));overflow-x:auto;position:sticky;top:0;z-index:10}.nav-button{white-space:nowrap;border:0;background:transparent;color:var(--muted);padding:10px 13px;border-radius:9px;font-weight:700;cursor:pointer}.nav-button:hover{background:#f1f5f9;color:var(--navy)}.nav-button.active{background:#dbeafe;color:#1d4ed8}
+.module-nav{background:white;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:5px;padding:10px max(18px,calc((100% - 1150px)/2));overflow-x:auto;position:sticky;top:0;z-index:10}.nav-button{white-space:nowrap;border:0;background:transparent;color:var(--muted);padding:10px 13px;border-radius:9px;font-weight:700;cursor:pointer}.nav-button:hover{background:#f1f5f9;color:var(--navy)}.nav-button.active{background:#dbeafe;color:#1d4ed8}.nav-exchange{display:flex;align-items:center;gap:7px;margin-left:auto;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:#f8fafc;white-space:nowrap;font-size:12px;color:var(--muted)}.nav-exchange strong{font-size:13px;color:var(--navy)}
 .welcome-hero{background:linear-gradient(135deg,#0f172a,#1e3a5f);color:white;border-radius:18px;padding:30px;margin-bottom:18px;display:flex;justify-content:space-between;gap:20px;align-items:center}.welcome-hero h1{margin-bottom:8px}.welcome-hero p{margin:0;color:#cbd5e1}.welcome-date{background:#ffffff12;border:1px solid #ffffff26;border-radius:12px;padding:12px 15px;white-space:nowrap;text-align:center}
 .module-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}.module-card{border:1px solid var(--line);background:white;border-radius:13px;padding:18px;text-align:left;cursor:pointer;min-height:115px;transition:transform .15s,border-color .15s,box-shadow .15s}.module-card:hover{transform:translateY(-2px);border-color:#93c5fd;box-shadow:0 10px 25px #0f172a12}.module-icon{display:block;font-size:23px;margin-bottom:13px}.module-card strong{display:block;color:var(--navy)}.module-card small{display:block;color:var(--muted);margin-top:5px}
 .dashboard-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:18px}.panel-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px}.panel-title h2{margin:0}
@@ -124,6 +124,7 @@ input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:9
 <button class="nav-button" data-page="nacional" onclick="showPage('nacional')">Atendimento Nacional</button>
 <button class="nav-button" data-page="plantao" onclick="showPage('plantao')">Plantão</button>
 <button class="nav-button" data-page="comercial" onclick="showPage('comercial')">Comercial</button>
+<div id="exchangeTicker" class="nav-exchange" aria-label="Cotação do dólar americano" aria-live="polite"><span>USD</span><strong id="exchangeTickerValue">—</strong></div>
 </nav>
 <main class="wrap">
 <section id="page-admin" class="card admin-card app-page hidden">
@@ -330,6 +331,7 @@ input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:9
 <script src="./supabase-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="./international-fares.js"></script>
+<script src="./exchange-rates.js"></script>
 <script>
 const SUPABASE_URL=window.SUPABASE_CONFIG?.url||'';
 const SUPABASE_PUBLISHABLE_KEY=window.SUPABASE_CONFIG?.publishableKey||'';
@@ -688,10 +690,22 @@ function formatDate(value){return localDate(value).toLocaleDateString('pt-BR')}
 function setDashboardMessage(message,type=''){
  const element=document.getElementById('dashboardMessage');element.textContent=message;element.className=`admin-message ${type}`.trim();
 }
+function renderExchangeRates(){
+ const rate=window.ExchangeRates?.get('USD');
+ const ticker=document.getElementById('exchangeTicker');
+ const value=document.getElementById('exchangeTickerValue');
+ value.textContent=rate?`R$ ${rate.rateSell.toLocaleString('pt-BR',{minimumFractionDigits:4,maximumFractionDigits:4})}`:'Indisponível';
+ ticker.title=rate?`Dólar americano • PTAX venda • Referência: ${formatDate(rate.referenceDate)} • Atualizado em ${new Date(rate.fetchedAt).toLocaleString('pt-BR')}`:'Cotação temporariamente indisponível';
+}
+async function loadExchangeRates(){
+ try{await window.ExchangeRates.loadLatest(supabaseClient)}catch(error){console.info('Não foi possível carregar as cotações armazenadas.',error)}
+ renderExchangeRates();
+}
 async function loadDashboard(){
  if(!currentMembership)return;
  const now=new Date();
  document.getElementById('welcomeDate').innerHTML=`<strong>${now.toLocaleDateString('pt-BR',{weekday:'long'})}</strong><br><span class="small">${now.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</span>`;
+ loadExchangeRates();
  const today=now.toISOString().slice(0,10);
  const [announcementResult,vacationResult]=await Promise.all([
    supabaseClient.from('announcements').select('id,title,message,kind,event_date,created_at').eq('organization_id',currentMembership.organization_id).order('created_at',{ascending:false}),
