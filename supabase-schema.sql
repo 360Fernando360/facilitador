@@ -68,11 +68,37 @@ create table if not exists public.vacations (
 create index if not exists vacations_organization_id_idx on public.vacations(organization_id);
 create index if not exists vacations_dates_idx on public.vacations(start_date,end_date);
 
+-- Presença atual e consolidação diária para o painel administrativo.
+-- Não são armazenados conteúdos digitados ou dados das solicitações.
+create table if not exists public.user_activity (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  organization_id uuid not null references public.organizations(id) on delete cascade,
+  current_page text not null default 'home',
+  session_started_at timestamptz not null default now(),
+  last_seen_at timestamptz not null default now()
+);
+
+create index if not exists user_activity_organization_idx on public.user_activity(organization_id,last_seen_at desc);
+
+create table if not exists public.user_daily_usage (
+  organization_id uuid not null references public.organizations(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  usage_date date not null,
+  access_count integer not null default 0 check (access_count >= 0),
+  active_seconds integer not null default 0 check (active_seconds >= 0),
+  last_seen_at timestamptz not null default now(),
+  primary key (organization_id,user_id,usage_date)
+);
+
+create index if not exists user_daily_usage_date_idx on public.user_daily_usage(organization_id,usage_date desc);
+
 alter table public.organizations enable row level security;
 alter table public.organization_members enable row level security;
 alter table public.emissions enable row level security;
 alter table public.announcements enable row level security;
 alter table public.vacations enable row level security;
+alter table public.user_activity enable row level security;
+alter table public.user_daily_usage enable row level security;
 
 -- A função evita recursão entre as políticas de organizações e membros.
 create or replace function public.current_organization_ids()
@@ -129,6 +155,63 @@ $$;
 revoke all on function public.can_manage_organization(uuid) from public;
 grant execute on function public.can_manage_organization(uuid) to authenticated;
 
+-- Atualiza a presença e soma somente intervalos curtos entre sinais do navegador.
+-- Pausas superiores a cinco minutos não são contabilizadas como tempo ativo.
+create or replace function public.track_user_activity(page_name text, new_session boolean default false)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  actor_id uuid := auth.uid();
+  actor_organization_id uuid;
+  previous_seen_at timestamptz;
+  elapsed_seconds integer := 0;
+  safe_page_name text := left(coalesce(nullif(btrim(page_name),''),'home'),50);
+begin
+  select organization_id into actor_organization_id
+  from public.organization_members
+  where user_id = actor_id;
+
+  if actor_id is null or actor_organization_id is null then
+    raise exception 'Usuário sem organização vinculada';
+  end if;
+
+  select last_seen_at into previous_seen_at
+  from public.user_activity
+  where user_id = actor_id
+  for update;
+
+  if not new_session and previous_seen_at is not null and now() - previous_seen_at <= interval '5 minutes' then
+    elapsed_seconds := greatest(0,least(300,floor(extract(epoch from (now() - previous_seen_at)))::integer));
+  end if;
+
+  insert into public.user_activity (user_id,organization_id,current_page,session_started_at,last_seen_at)
+  values (actor_id,actor_organization_id,safe_page_name,now(),now())
+  on conflict (user_id) do update set
+    organization_id = excluded.organization_id,
+    current_page = excluded.current_page,
+    session_started_at = case when new_session then now() else public.user_activity.session_started_at end,
+    last_seen_at = now();
+
+  insert into public.user_daily_usage (organization_id,user_id,usage_date,access_count,active_seconds,last_seen_at)
+  values (actor_organization_id,actor_id,(now() at time zone 'America/Sao_Paulo')::date,case when new_session then 1 else 0 end,elapsed_seconds,now())
+  on conflict (organization_id,user_id,usage_date) do update set
+    access_count = public.user_daily_usage.access_count + excluded.access_count,
+    active_seconds = public.user_daily_usage.active_seconds + excluded.active_seconds,
+    last_seen_at = now();
+end;
+$$;
+
+revoke all on function public.track_user_activity(text,boolean) from public;
+grant execute on function public.track_user_activity(text,boolean) to authenticated;
+
+revoke all on public.user_activity from anon,authenticated;
+revoke all on public.user_daily_usage from anon,authenticated;
+grant select on public.user_activity to authenticated;
+grant select on public.user_daily_usage to authenticated;
+
 drop policy if exists "members can read their organization" on public.organizations;
 create policy "members can read their organization"
 on public.organizations for select to authenticated
@@ -143,6 +226,16 @@ drop policy if exists "admins can read organization members" on public.organizat
 create policy "admins can read organization members"
 on public.organization_members for select to authenticated
 using (public.can_manage_organization(organization_id));
+
+drop policy if exists "admins can read user activity" on public.user_activity;
+create policy "admins can read user activity"
+on public.user_activity for select to authenticated
+using (public.is_organization_admin(organization_id));
+
+drop policy if exists "admins can read daily usage" on public.user_daily_usage;
+create policy "admins can read daily usage"
+on public.user_daily_usage for select to authenticated
+using (public.is_organization_admin(organization_id));
 
 drop policy if exists "members can read their emissions" on public.emissions;
 create policy "members can read their emissions"

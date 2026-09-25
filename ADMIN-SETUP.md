@@ -4,6 +4,8 @@
 
 Abra o SQL Editor do Supabase e execute todo o arquivo `supabase-schema.sql`.
 
+Esse mesmo arquivo cria a medição de uso exibida na área administrativa. O painel registra presença, área geral acessada, quantidade de acessos e tempo aproximado de atividade; ele não armazena o conteúdo digitado pelos usuários.
+
 Depois, preencha nome e e-mail do administrador que já existe:
 
 ```sql

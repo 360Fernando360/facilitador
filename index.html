@@ -54,6 +54,7 @@ input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:9
 .admin-message{min-height:20px;margin:12px 0 0;font-size:13px;font-weight:700}.admin-message.error{color:var(--red)}.admin-message.success{color:var(--green)}
 .member-list{margin-top:20px;display:grid;gap:9px}.member-row{display:grid;grid-template-columns:1.2fr 1.5fr .7fr;gap:12px;align-items:center;padding:13px 15px;background:white;border:1px solid var(--line);border-radius:10px}.member-name{font-weight:800;color:var(--navy)}.role-badge{justify-self:start;padding:5px 9px;border-radius:999px;background:#e2e8f0;font-size:11px;font-weight:800;text-transform:uppercase}.role-badge.admin{background:#dbeafe;color:#1d4ed8}.empty-members{text-align:center;padding:22px;color:var(--muted)}
 .role-badge.manager{background:#fef3c7;color:#92400e}
+.usage-panel{margin-top:24px;padding-top:22px;border-top:1px solid #bfdbfe}.usage-heading{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:14px}.usage-heading h3{margin:0;color:var(--navy)}.usage-heading p{margin:4px 0 0}.usage-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}.usage-stat{background:white;border:1px solid var(--line);border-radius:11px;padding:14px}.usage-stat span{display:block;color:var(--muted);font-size:12px;font-weight:700}.usage-stat strong{display:block;color:var(--navy);font-size:22px;margin-top:5px}.usage-table-wrap{overflow-x:auto;background:white;border:1px solid var(--line);border-radius:11px}.usage-table{width:100%;border-collapse:collapse;min-width:760px}.usage-table th,.usage-table td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--line);font-size:13px}.usage-table th{background:#f8fafc;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em}.usage-table tr:last-child td{border-bottom:0}.presence{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:12px}.presence::before{content:'';width:8px;height:8px;border-radius:50%;background:#94a3b8}.presence.online{color:#15803d}.presence.online::before{background:#22c55e;box-shadow:0 0 0 3px #dcfce7}.usage-empty{text-align:center!important;color:var(--muted);padding:22px!important}
 .module-nav{background:white;border-bottom:1px solid var(--line);display:flex;gap:5px;padding:10px max(18px,calc((100% - 1150px)/2));overflow-x:auto;position:sticky;top:0;z-index:10}.nav-button{white-space:nowrap;border:0;background:transparent;color:var(--muted);padding:10px 13px;border-radius:9px;font-weight:700;cursor:pointer}.nav-button:hover{background:#f1f5f9;color:var(--navy)}.nav-button.active{background:#dbeafe;color:#1d4ed8}
 .welcome-hero{background:linear-gradient(135deg,#0f172a,#1e3a5f);color:white;border-radius:18px;padding:30px;margin-bottom:18px;display:flex;justify-content:space-between;gap:20px;align-items:center}.welcome-hero h1{margin-bottom:8px}.welcome-hero p{margin:0;color:#cbd5e1}.welcome-date{background:#ffffff12;border:1px solid #ffffff26;border-radius:12px;padding:12px 15px;white-space:nowrap;text-align:center}
 .module-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}.module-card{border:1px solid var(--line);background:white;border-radius:13px;padding:18px;text-align:left;cursor:pointer;min-height:115px;transition:transform .15s,border-color .15s,box-shadow .15s}.module-card:hover{transform:translateY(-2px);border-color:#93c5fd;box-shadow:0 10px 25px #0f172a12}.module-icon{display:block;font-size:23px;margin-bottom:13px}.module-card strong{display:block;color:var(--navy)}.module-card small{display:block;color:var(--muted);margin-top:5px}
@@ -81,7 +82,7 @@ input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:9
 .reissue-settings{display:grid;grid-template-columns:1.35fr .65fr;gap:10px;margin-bottom:10px}.quick-entry,.quick-config{border:1px solid var(--line);border-radius:10px;padding:11px 14px;background:#f8fafc}.quick-entry h3,.quick-config h3{font-size:13px;color:var(--navy);margin-bottom:7px}.quick-row{display:grid;grid-template-columns:1fr 160px;gap:10px;align-items:center;padding:3px 0;border-bottom:1px solid #e5e7eb}.quick-row:last-child{border-bottom:0}.quick-row label{margin:0;font-size:13px}.quick-row input{height:34px;text-align:right;font-weight:700}.quick-config{background:#eff6ff;border-color:#bfdbfe}.quick-config .quick-row{grid-template-columns:1fr 100px;border-color:#bfdbfe}.du-toggle{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:6px}.check-field{display:flex;align-items:center;gap:8px;height:34px;background:white;border:1px solid #bfdbfe;border-radius:8px;padding:0 9px}.check-field input{width:17px;height:17px}.check-field label{margin:0;font-size:12px}.quick-clear{width:100%;margin-top:7px;padding:8px}.calculation-table{width:100%;border-collapse:collapse;background:white;font-size:12px}.calculation-table th{background:#dbeafe;color:#1e3a8a;text-align:left;padding:7px 8px;border:1px solid #bfdbfe}.calculation-table td{padding:5px 8px;border:1px solid var(--line)}.calculation-table td:last-child{text-align:right;font-weight:700}.calculation-table .total-row td{background:#fef08a;color:#713f12;font-weight:900}.reverse-calculator{margin-top:10px;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:11px 14px}.reverse-calculator p{margin-bottom:8px}.reverse-calculator .field{margin-bottom:0}.reverse-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.reverse-head h3{margin-bottom:0;font-size:15px}.reverse-head .btn{padding:7px 11px}.reissue-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:10px;flex-wrap:wrap}.reissue-result>div{min-width:0}.reissue-result .copy-box{margin-top:7px}
 @media(max-width:1000px){.module-grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:850px){.grid3,.grid2,.passengers,.summary,.admin-form,.dashboard-grid,.manager-forms,.pet-layout,.reissue-settings{grid-template-columns:1fr}.login{padding:18px}.login-shell{display:block;max-width:470px}.login-hero{display:none}.login-card{padding:38px 28px;min-height:calc(100vh - 36px)}.top{align-items:flex-start;gap:14px}.top>div:last-child{text-align:right}.member-row{grid-template-columns:1fr}.role-badge{justify-self:start}.welcome-hero{align-items:flex-start;flex-direction:column}.module-grid,.service-grid{grid-template-columns:repeat(2,1fr)}.fare-grid{grid-template-columns:repeat(2,1fr)}.gol-scenarios{grid-template-columns:1fr}.gol-scenario h4{min-height:0}.azul-details{grid-template-columns:repeat(2,1fr)}.international-heading{align-items:stretch;flex-direction:column}.international-controls{width:100%}.page-heading{flex-direction:column}.airline-picker{width:100%}}
-@media(max-width:600px){.quick-row,.quick-config .quick-row{grid-template-columns:1fr}.quick-row input{text-align:left}}
+@media(max-width:600px){.quick-row,.quick-config .quick-row,.usage-stats{grid-template-columns:1fr}.quick-row input{text-align:left}.usage-heading{align-items:flex-start;flex-direction:column}}
 @media(max-width:520px){.module-grid,.service-grid,.fare-grid,.reissue-result,.fare-detail-grid,.minor-request-list,.gol-pet-prices,.azul-details,.international-controls,.international-detail-grid{grid-template-columns:1fr}.pet-data-list{grid-template-columns:1fr}.pet-data-list li:last-child,.minor-request-group:last-child,.azul-detail.wide{grid-column:auto}.involuntary-row,.gol-no-action-row{grid-template-columns:1fr;gap:4px}}
 @media(max-width:420px){.login{padding:0}.login-shell{border:0;border-radius:0;min-height:100vh}.login-card{padding:32px 22px;min-height:100vh}.login-title{font-size:24px}}
 </style>
@@ -135,6 +136,11 @@ input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:9
 </form>
 <div id="inviteMessage" class="admin-message" role="status" aria-live="polite"></div>
 <div id="memberList" class="member-list"><div class="empty-members">Carregando usuários...</div></div>
+<div class="usage-panel">
+<div class="usage-heading"><div><h3>Uso do sistema</h3><p class="muted small">Presença e uso aproximado. Nenhum conteúdo digitado é registrado.</p></div><button class="btn secondary" type="button" onclick="loadActivityDashboard()">Atualizar</button></div>
+<div class="usage-stats"><div class="usage-stat"><span>Ativos agora</span><strong id="usageOnline">—</strong></div><div class="usage-stat"><span>Acessos hoje</span><strong id="usageAccesses">—</strong></div><div class="usage-stat"><span>Tempo de uso hoje</span><strong id="usageTime">—</strong></div></div>
+<div class="usage-table-wrap"><table class="usage-table"><thead><tr><th>Usuário</th><th>Status</th><th>Área atual</th><th>Última atividade</th><th>Acessos hoje</th><th>Tempo hoje</th></tr></thead><tbody id="usageTableBody"><tr><td class="usage-empty" colspan="6">Carregando medição...</td></tr></tbody></table></div>
+</div>
 </section>
 
 <section id="page-home" class="app-page">
@@ -334,6 +340,11 @@ let recoveryMode=false;
 let passwordFlow='recovery';
 let currentMembership=null;
 let currentUserId=null;
+let currentAppPage='home';
+let activityHeartbeatId=null;
+let adminActivityRefreshId=null;
+let activityTrackingAvailable=true;
+let organizationMembersCache=[];
 let calendarCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1);
 let dashboardEventDates=new Set();
 
@@ -432,6 +443,7 @@ async function login(event){
  finally{setLoginLoading(false)}
 }
 async function logout(){
+ stopActivityTracking();
  if(supabaseClient)await supabaseClient.auth.signOut();
  currentMembership=null;
  currentUserId=null;
@@ -442,7 +454,7 @@ async function logout(){
  document.getElementById('loginUser').focus();
 }
 async function applySession(session){
- if(!session){currentMembership=null;document.getElementById('companyName').textContent='';document.getElementById('adminButton').classList.add('hidden');showScreen('login');return}
+ if(!session){stopActivityTracking();currentMembership=null;document.getElementById('companyName').textContent='';document.getElementById('adminButton').classList.add('hidden');showScreen('login');return}
  const {data:membership,error}=await supabaseClient
    .from('organization_members')
    .select('organization_id,role,full_name,email,organization:organizations(name)')
@@ -469,6 +481,7 @@ async function applySession(session){
  document.getElementById('loginError').textContent='';
  showScreen('app');
  showPage('home');
+ startActivityTracking();
 }
 async function initializeAuthentication(){
  if(!supabaseClient){document.getElementById('loginError').textContent='Configure o Supabase em supabase-config.js para ativar o acesso.';return}
@@ -545,15 +558,38 @@ async function copyInternationalFare(){
  const text=document.getElementById('internationalFareCopyText')?.textContent;if(!text)return;
  try{await navigator.clipboard.writeText(text);alert('Informações do perfil copiadas.')}catch(_error){alert('Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.')}
 }
+const APP_PAGE_LABELS={home:'Início',emissao:'Emissão',inter:'Atendimento Internacional',nacional:'Atendimento Nacional',plantao:'Plantão',comercial:'Comercial',admin:'Administração'};
+async function trackActivity(newSession=false){
+ if(!supabaseClient||!currentMembership||!activityTrackingAvailable)return;
+ const {error}=await supabaseClient.rpc('track_user_activity',{page_name:currentAppPage,new_session:newSession});
+ if(error){activityTrackingAvailable=false;console.info('Medição de uso indisponível até a atualização do banco de dados.');}
+}
+function startActivityTracking(){
+ stopActivityTracking();activityTrackingAvailable=true;
+ trackActivity(true);
+ activityHeartbeatId=setInterval(()=>{if(document.visibilityState==='visible')trackActivity(false)},60000);
+}
+function stopActivityTracking(){
+ if(activityHeartbeatId)clearInterval(activityHeartbeatId);
+ if(adminActivityRefreshId)clearInterval(adminActivityRefreshId);
+ activityHeartbeatId=null;adminActivityRefreshId=null;
+}
+function startAdminActivityRefresh(){
+ if(adminActivityRefreshId)clearInterval(adminActivityRefreshId);
+ adminActivityRefreshId=setInterval(()=>{if(currentAppPage==='admin'&&document.visibilityState==='visible')loadActivityDashboard()},30000);
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&currentMembership)trackActivity(false)});
 function showPage(page){
  if(page==='admin'&&currentMembership?.role!=='admin')return;
  document.querySelectorAll('.app-page').forEach(section=>section.classList.add('hidden'));
  const target=document.getElementById(`page-${page}`);if(!target)return;
  target.classList.remove('hidden');
+ currentAppPage=page;
+ trackActivity(false);
  document.querySelectorAll('.nav-button').forEach(button=>button.classList.toggle('active',button.dataset.page===page));
  window.scrollTo({top:0,behavior:'smooth'});
  if(page==='home')loadDashboard();
- if(page==='admin')loadMembers();
+ if(page==='admin'){loadMembers();startAdminActivityRefresh()}else if(adminActivityRefreshId){clearInterval(adminActivityRefreshId);adminActivityRefreshId=null}
  if(page==='nacional'){
    const airline=document.getElementById('nationalAirline').value;
    const airlineContent=document.getElementById(`national-${airline}`);
@@ -580,12 +616,50 @@ function renderMembers(members){
    row.append(name,email,role);list.appendChild(row);
  });
 }
+function localDateKey(){const date=new Date(),pad=value=>String(value).padStart(2,'0');return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`}
+function formatUsageTime(seconds){
+ const total=Math.max(0,Number(seconds)||0),hours=Math.floor(total/3600),minutes=Math.floor((total%3600)/60);
+ if(hours)return `${hours}h ${minutes}min`;
+ return `${minutes} min`;
+}
+function formatLastActivity(value){return value?new Date(value).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}):'Sem atividade'}
+async function loadActivityDashboard(){
+ if(currentMembership?.role!=='admin')return;
+ const body=document.getElementById('usageTableBody');
+ if(!organizationMembersCache.length){body.innerHTML='<tr><td class="usage-empty" colspan="6">Carregando medição...</td></tr>';return}
+ const organizationId=currentMembership.organization_id;
+ const [activityResult,usageResult]=await Promise.all([
+   supabaseClient.from('user_activity').select('user_id,current_page,last_seen_at').eq('organization_id',organizationId),
+   supabaseClient.from('user_daily_usage').select('user_id,access_count,active_seconds,last_seen_at').eq('organization_id',organizationId).eq('usage_date',localDateKey())
+ ]);
+ if(activityResult.error||usageResult.error){body.innerHTML='<tr><td class="usage-empty" colspan="6">Execute o SQL atualizado no Supabase para ativar a medição.</td></tr>';return}
+ const activityByUser=new Map((activityResult.data||[]).map(item=>[item.user_id,item]));
+ const usageByUser=new Map((usageResult.data||[]).map(item=>[item.user_id,item]));
+ const onlineLimit=Date.now()-120000;
+ let onlineCount=0,totalAccesses=0,totalSeconds=0;
+ body.replaceChildren();
+ organizationMembersCache.forEach(member=>{
+   const activity=activityByUser.get(member.user_id),usage=usageByUser.get(member.user_id);
+   const online=Boolean(activity?.last_seen_at&&new Date(activity.last_seen_at).getTime()>=onlineLimit);
+   if(online)onlineCount++;
+   totalAccesses+=Number(usage?.access_count)||0;totalSeconds+=Number(usage?.active_seconds)||0;
+   const row=document.createElement('tr');
+   const values=[member.full_name||member.email||'Usuário',online?'Online':'Offline',APP_PAGE_LABELS[activity?.current_page]||activity?.current_page||'—',formatLastActivity(activity?.last_seen_at),String(usage?.access_count||0),formatUsageTime(usage?.active_seconds)];
+   values.forEach((value,index)=>{const cell=document.createElement('td');if(index===1){const badge=document.createElement('span');badge.className=`presence ${online?'online':''}`;badge.textContent=value;cell.appendChild(badge)}else cell.textContent=value;row.appendChild(cell)});
+   body.appendChild(row);
+ });
+ document.getElementById('usageOnline').textContent=String(onlineCount);
+ document.getElementById('usageAccesses').textContent=String(totalAccesses);
+ document.getElementById('usageTime').textContent=formatUsageTime(totalSeconds);
+}
 async function loadMembers(){
  if(currentMembership?.role!=='admin')return;
  const list=document.getElementById('memberList');list.innerHTML='<div class="empty-members">Carregando usuários...</div>';
  const {data,error}=await supabaseClient.from('organization_members').select('user_id,full_name,email,role,created_at').eq('organization_id',currentMembership.organization_id).order('full_name',{ascending:true});
  if(error){list.innerHTML='<div class="empty-members">Não foi possível carregar os usuários. Verifique se o SQL atualizado foi executado.</div>';return}
- renderMembers(data||[]);
+ organizationMembersCache=data||[];
+ renderMembers(organizationMembersCache);
+ await loadActivityDashboard();
 }
 async function inviteUser(event){
  event.preventDefault();
