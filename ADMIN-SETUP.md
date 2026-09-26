@@ -40,9 +40,9 @@ No Dashboard, abra `Authentication > URL Configuration` e confirme:
 
 O provedor padrão do Supabase tem limite baixo. Configure um SMTP próprio em `Authentication > Emails > SMTP Settings` antes de usar convites em produção.
 
-## 5. Cotações PTAX
+## 5. PTAX USD diária
 
-O arquivo `supabase-schema.sql` cria o histórico central `exchange_rates` e a função de leitura `get_latest_exchange_rates()`. Execute novamente o arquivo completo no SQL Editor antes de publicar o quadro de câmbio.
+O arquivo `supabase-schema.sql` cria o histórico `exchange_rates`, o controle de janelas `exchange_rate_runs` e a função de leitura `get_latest_exchange_rates()`. Execute novamente o arquivo completo no SQL Editor antes de publicar esta versão.
 
 Crie um segredo forte e configure-o somente no ambiente da Edge Function:
 
@@ -51,7 +51,9 @@ supabase secrets set PTAX_UPDATE_SECRET="COLOQUE_UM_SEGREDO_FORTE_AQUI"
 supabase functions deploy update-ptax
 ```
 
-A função consulta exclusivamente a API PTAX oficial do Banco Central, aceita somente o boletim `Fechamento` e armazena a `cotacaoVenda`. A chave única formada por moeda e data de referência torna novas execuções idempotentes.
+A função consulta exclusivamente o USD na API PTAX oficial do Banco Central, aceita somente o boletim `Fechamento` e armazena a `cotacaoVenda`. Esta taxa oficial de referência não é câmbio turismo.
+
+Cada janela diária é registrada antes da consulta. Se a janela das 07h00 falhar, o registro da madrugada permanece vigente; se ambas falharem, nenhuma taxa anterior é apagada. A abertura do sistema solicita apenas a janela vencida que ainda não tenha sido processada.
 
 ### Agendamento
 
@@ -69,12 +71,29 @@ select vault.create_secret(
 );
 ```
 
-Depois, crie o trabalho principal para 18h15 no horário de Brasília, de segunda a sexta-feira. O cron do Supabase usa UTC; por isso, o horário abaixo é 21h15 UTC:
+Remova os trabalhos antigos das 18h15/19h15 e crie as duas janelas diárias. O Cron do Supabase usa UTC; como `America/Sao_Paulo` está em UTC-3, 00h05 corresponde a 03h05 UTC e 07h00 corresponde a 10h00 UTC:
 
 ```sql
+do $block$
+begin
+  if exists (select 1 from cron.job where jobname = 'update-ptax-weekdays') then
+    perform cron.unschedule('update-ptax-weekdays');
+  end if;
+  if exists (select 1 from cron.job where jobname = 'update-ptax-weekdays-retry') then
+    perform cron.unschedule('update-ptax-weekdays-retry');
+  end if;
+  if exists (select 1 from cron.job where jobname = 'update-ptax-midnight') then
+    perform cron.unschedule('update-ptax-midnight');
+  end if;
+  if exists (select 1 from cron.job where jobname = 'update-ptax-opening') then
+    perform cron.unschedule('update-ptax-opening');
+  end if;
+end
+$block$;
+
 select cron.schedule(
-  'update-ptax-weekdays',
-  '15 21 * * 1-5',
+  'update-ptax-midnight',
+  '5 3 * * *',
   $$
   select net.http_post(
     url := (select decrypted_secret from vault.decrypted_secrets where name = 'ptax_project_url') || '/functions/v1/update-ptax',
@@ -82,16 +101,30 @@ select cron.schedule(
       'Content-Type','application/json',
       'x-ptax-update-secret',(select decrypted_secret from vault.decrypted_secrets where name = 'ptax_update_secret')
     ),
-    body := '{}'::jsonb,
+    body := '{"slot":"midnight"}'::jsonb,
+    timeout_milliseconds := 30000
+  );
+  $$
+);
+
+select cron.schedule(
+  'update-ptax-opening',
+  '0 10 * * *',
+  $$
+  select net.http_post(
+    url := (select decrypted_secret from vault.decrypted_secrets where name = 'ptax_project_url') || '/functions/v1/update-ptax',
+    headers := jsonb_build_object(
+      'Content-Type','application/json',
+      'x-ptax-update-secret',(select decrypted_secret from vault.decrypted_secrets where name = 'ptax_update_secret')
+    ),
+    body := '{"slot":"opening"}'::jsonb,
     timeout_milliseconds := 30000
   );
   $$
 );
 ```
 
-É recomendável criar uma segunda tentativa às 19h15 de Brasília usando outro nome e a expressão `15 22 * * 1-5`. Repetir a chamada não duplica o histórico.
-
-Em caso de indisponibilidade do Banco Central, a função registra a falha nos logs e não remove nem substitui as últimas cotações válidas.
+Os trabalhos rodam todos os dias. Em fins de semana e feriados, a API pode devolver o último fechamento disponível; a interface mostra separadamente a data informada pela fonte e o horário da última consulta bem-sucedida.
 
 ### Testes locais
 

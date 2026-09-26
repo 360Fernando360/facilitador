@@ -1,11 +1,10 @@
 (function exposeExchangeRates(global) {
-  const supported = new Set(['USD', 'EUR', 'GBP', 'CAD']);
-  const latest = new Map();
+  let latestUsd = null;
 
   function normalize(row) {
     const currency = String(row?.currency || '').toUpperCase();
     const rateSell = Number(row?.rate_sell);
-    if (!supported.has(currency) || !Number.isFinite(rateSell) || rateSell <= 0 || !row?.reference_date) return null;
+    if (currency !== 'USD' || !Number.isFinite(rateSell) || rateSell <= 0 || !row?.reference_date || !row?.fetched_at) return null;
     return Object.freeze({
       currency,
       currencyName: row.currency_name,
@@ -19,18 +18,13 @@
   async function loadLatest(supabaseClient) {
     const { data, error } = await supabaseClient.rpc('get_latest_exchange_rates');
     if (error) throw error;
-    latest.clear();
-    (data || []).map(normalize).filter(Boolean).forEach((rate) => latest.set(rate.currency, rate));
-    return all();
+    latestUsd = normalize((data || [])[0]);
+    return latestUsd;
   }
 
-  function get(currency) {
-    return latest.get(String(currency || '').toUpperCase()) || null;
+  function getUsd() {
+    return latestUsd;
   }
 
-  function all() {
-    return [...latest.values()];
-  }
-
-  global.ExchangeRates = Object.freeze({ loadLatest, get, all });
+  global.ExchangeRates = Object.freeze({ loadLatest, getUsd });
 })(window);

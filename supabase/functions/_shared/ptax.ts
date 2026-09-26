@@ -1,14 +1,7 @@
 export const PTAX_SOURCE = 'Banco Central do Brasil - PTAX'
-export const SUPPORTED_CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD'] as const
-
-export type SupportedCurrency = typeof SUPPORTED_CURRENCIES[number]
-
-export const CURRENCY_NAMES: Record<SupportedCurrency, string> = {
-  USD: 'Dólar Americano',
-  EUR: 'Euro',
-  GBP: 'Libra Esterlina',
-  CAD: 'Dólar Canadense',
-}
+export const USD_CURRENCY = 'USD' as const
+export const USD_CURRENCY_NAME = 'Dólar Americano'
+export type PtaxSlot = 'midnight' | 'opening'
 
 export type PtaxApiRecord = {
   cotacaoVenda?: unknown
@@ -17,7 +10,7 @@ export type PtaxApiRecord = {
 }
 
 export type ExchangeRateRecord = {
-  currency: SupportedCurrency
+  currency: typeof USD_CURRENCY
   currency_name: string
   rate_sell: number
   reference_date: string
@@ -37,11 +30,11 @@ export function formatPtaxDate(date: Date): string {
   return formatter.format(date).replaceAll('/', '-')
 }
 
-export function buildPtaxUrl(currency: SupportedCurrency, endDate = new Date(), lookbackDays = 45): string {
+export function buildPtaxUrl(endDate = new Date(), lookbackDays = 45): string {
   const startDate = new Date(endDate.getTime())
   startDate.setUTCDate(startDate.getUTCDate() - lookbackDays)
   const parameters = new URLSearchParams({
-    '@moeda': `'${currency}'`,
+    '@moeda': `'${USD_CURRENCY}'`,
     '@dataInicial': `'${formatPtaxDate(startDate)}'`,
     '@dataFinalCotacao': `'${formatPtaxDate(endDate)}'`,
     '$format': 'json',
@@ -61,7 +54,6 @@ function referenceDate(value: unknown): string | null {
 }
 
 export function selectLatestClosingRate(
-  currency: SupportedCurrency,
   records: PtaxApiRecord[],
   fetchedAt = new Date(),
 ): ExchangeRateRecord | null {
@@ -76,8 +68,8 @@ export function selectLatestClosingRate(
   const latest = valid[0]
   if (!latest) return null
   return {
-    currency,
-    currency_name: CURRENCY_NAMES[currency],
+    currency: USD_CURRENCY,
+    currency_name: USD_CURRENCY_NAME,
     rate_sell: latest.rate,
     reference_date: latest.date,
     fetched_at: fetchedAt.toISOString(),
@@ -86,19 +78,35 @@ export function selectLatestClosingRate(
 }
 
 export async function fetchLatestClosingRate(
-  currency: SupportedCurrency,
   options: { fetcher?: typeof fetch; now?: Date; lookbackDays?: number } = {},
 ): Promise<ExchangeRateRecord> {
   const fetcher = options.fetcher ?? fetch
   const now = options.now ?? new Date()
-  const response = await fetcher(buildPtaxUrl(currency, now, options.lookbackDays ?? 45), {
+  const response = await fetcher(buildPtaxUrl(now, options.lookbackDays ?? 45), {
     headers: { Accept: 'application/json' },
     signal: AbortSignal.timeout(15000),
   })
-  if (!response.ok) throw new Error(`BCB respondeu HTTP ${response.status} para ${currency}`)
+  if (!response.ok) throw new Error(`BCB respondeu HTTP ${response.status} para USD`)
   const payload = await response.json() as { value?: PtaxApiRecord[] }
-  if (!Array.isArray(payload.value)) throw new Error(`Resposta inválida do BCB para ${currency}`)
-  const rate = selectLatestClosingRate(currency, payload.value, now)
-  if (!rate) throw new Error(`Nenhum fechamento válido encontrado para ${currency}`)
+  if (!Array.isArray(payload.value)) throw new Error('Resposta inválida do BCB para USD')
+  const rate = selectLatestClosingRate(payload.value, now)
+  if (!rate) throw new Error('Nenhum fechamento válido encontrado para USD')
   return rate
+}
+
+export function getSaoPauloSchedule(now = new Date()): { runDate: string; slot: PtaxSlot | null } {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(now)
+  const value = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value ?? ''
+  const runDate = `${value('year')}-${value('month')}-${value('day')}`
+  const minutes = Number(value('hour')) * 60 + Number(value('minute'))
+  const slot: PtaxSlot | null = minutes >= 7 * 60 ? 'opening' : minutes >= 5 ? 'midnight' : null
+  return { runDate, slot }
 }
