@@ -24,6 +24,7 @@ const values = {
 assertEquals(calculator.totals(values), { usd: 20, brl: 108.64 }, 'totais nas duas moedas');
 
 const copied = calculator.copyText(values, 5.4321);
+assertEquals(copied.split('\n').slice(0, 3), ['Câmbio: 5,4321', 'VALOR POR PESSOA', ''], 'ordem do cabeçalho copiado');
 for (const expected of ['VALOR POR PESSOA', 'Câmbio: 5,4321', 'Diferença de tarifa: USD 10,00 | BRL 54,32', 'TOTAL: USD 20,00 | BRL 108,64']) {
   if (!copied.includes(expected)) throw new Error(`texto de cópia sem: ${expected}`);
 }

@@ -35,8 +35,8 @@
   function copyText(values, rate) {
     const total = totals(values);
     return [
-      'VALOR POR PESSOA',
       `Câmbio: ${Number(rate).toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}`,
+      'VALOR POR PESSOA',
       '',
       ...FIELD_LABELS.map(([key, label]) => `${label}: USD ${formatAmount(values[key]?.usd)} | BRL ${formatAmount(values[key]?.brl)}`),
       `TOTAL: USD ${formatAmount(total.usd)} | BRL ${formatAmount(total.brl)}`,

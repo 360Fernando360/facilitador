@@ -287,7 +287,7 @@ input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:9
 <div class="international-currency-label">DU AGT</div><div><input id="international-agencyDu-usd" class="international-currency-input" inputmode="decimal" placeholder="$ 0,00" aria-label="DU AGT em dólar" oninput="onInternationalReissueInput('agencyDu','USD')"></div><div><input id="international-agencyDu-brl" class="international-currency-input" inputmode="decimal" placeholder="R$ 0,00" aria-label="DU AGT em reais" oninput="onInternationalReissueInput('agencyDu','BRL')"></div>
 <div class="international-currency-total">TOTAL</div><div class="international-currency-total"><strong id="internationalReissueTotalUsd">USD 0,00</strong></div><div class="international-currency-total"><strong id="internationalReissueTotalBrl">BRL 0,00</strong></div></div>
 <p id="internationalReissueRateWarning" class="international-rate-warning hidden">Aguardando uma PTAX válida para habilitar as conversões.</p>
-<div class="copy-box international-copy"><pre id="internationalReissueCopy" class="copy-output">VALOR POR PESSOA\nCâmbio: aguardando PTAX</pre><div class="international-copy-actions"><button class="btn primary" id="internationalReissueCopyButton" type="button" onclick="copyInternationalReissue()">Copiar cálculo</button><button class="btn secondary" type="button" onclick="clearInternationalReissue()">Limpar</button></div></div></section>
+<div class="copy-box international-copy"><pre id="internationalReissueCopy" class="copy-output">Câmbio: aguardando PTAX\nVALOR POR PESSOA</pre><div class="international-copy-actions"><button class="btn primary" id="internationalReissueCopyButton" type="button" onclick="copyInternationalReissue()">Copiar cálculo</button><button class="btn secondary" type="button" onclick="clearInternationalReissue()">Limpar</button></div></div></section>
 </section>
 <section id="page-nacional" class="app-page hidden">
 <div class="page-heading"><div><h1>Atendimento Nacional</h1><p class="muted">Consulte procedimentos, gere comandos e acesse ferramentas das companhias nacionais.</p></div><div class="airline-picker"><label for="nationalAirline">Companhia aérea</label><select id="nationalAirline" onchange="selectNationalAirline()"><option value="LATAM">LATAM</option><option value="GOL">GOL</option><option value="AZUL">AZUL</option></select></div></div>
@@ -594,7 +594,7 @@ function renderInternationalReissueSummary(){
  const rate=internationalReissueRate(),values=internationalReissueValues(),total=window.InternationalReissue.totals(values);
  document.getElementById('internationalReissueTotalUsd').textContent=`USD ${formatInternationalInput(total.usd)}`;
  document.getElementById('internationalReissueTotalBrl').textContent=`BRL ${formatInternationalInput(total.brl)}`;
- document.getElementById('internationalReissueCopy').textContent=rate?window.InternationalReissue.copyText(values,rate):'VALOR POR PESSOA\nCâmbio: aguardando PTAX';
+ document.getElementById('internationalReissueCopy').textContent=rate?window.InternationalReissue.copyText(values,rate):'Câmbio: aguardando PTAX\nVALOR POR PESSOA';
  document.getElementById('internationalReissueCopyButton').disabled=!rate;
  document.getElementById('internationalReissueRateWarning').classList.toggle('hidden',Boolean(rate));
 }
