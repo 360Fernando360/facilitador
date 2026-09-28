@@ -988,8 +988,8 @@ function updateReissueCalculation(){
  document.getElementById('launchDu').textContent=duText;
  document.getElementById('launchPenalty').textContent=optional('reissuePenalty');
  document.getElementById('launchTotal').textContent=br(total);
- document.getElementById('personReissueCopy').textContent=`VALORES PARA REEMISSÃO POR PESSOA\nDiferença tarifária: ${br(fareWithMarkup)}\nDiferença de taxa: ${optional('reissueTaxDifference')}\nDU: ${duText}\nMulta: ${optional('reissuePenalty')}\nTOTAL: ${br(total)}`;
- document.getElementById('launchReissueCopy').textContent=`TABELA PARA LANÇAMENTOS\nDiferença tarifária: ${br(withoutMarkup)}\nMKP: ${markupText}\nDiferença de taxa: ${optional('reissueTaxDifference')}\nDU: ${duText}\nMulta: ${optional('reissuePenalty')}\nTOTAL: ${br(total)}`;
+ document.getElementById('personReissueCopy').innerHTML=`<strong>VALORES PARA REEMISSÃO POR PESSOA</strong><br><br><strong>Diferença tarifária:</strong> ${br(fareWithMarkup)}<br><strong>Diferença de taxa:</strong> ${optional('reissueTaxDifference')}<br><strong>DU:</strong> ${duText}<br><strong>Multa:</strong> ${optional('reissuePenalty')}<br><strong>TOTAL:</strong> ${br(total)}`;
+ document.getElementById('launchReissueCopy').innerHTML=`<strong>TABELA PARA LANÇAMENTOS</strong><br><br><strong>Diferença tarifária:</strong> ${br(withoutMarkup)}<br><strong>MKP:</strong> ${markupText}<br><strong>Diferença de taxa:</strong> ${optional('reissueTaxDifference')}<br><strong>DU:</strong> ${duText}<br><strong>Multa:</strong> ${optional('reissuePenalty')}<br><strong>TOTAL:</strong> ${br(total)}`;
  updateReverseMarkup();
 }
 function onReissueBaseChange(){
@@ -1010,8 +1010,14 @@ function clearReissueCalculator(){
  document.getElementById('reissueMarkupPercent').value='10';document.getElementById('reissueMinimumMarkup').value='40';document.getElementById('reissueExemptMarkup').checked=false;document.getElementById('reissueExemptDu').checked=false;updateReissueCalculation();document.getElementById('reissueWithoutMarkup').focus();
 }
 async function copyReissueBlock(id,successMessage){
- const text=document.getElementById(id).textContent;
- try{await navigator.clipboard.writeText(text);alert(successMessage)}catch(_error){alert('Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.')}
+ const element=document.getElementById(id),text=element.innerText,html=`<div>${element.innerHTML}</div>`;
+ try{
+  if(navigator.clipboard.write&&typeof ClipboardItem!=='undefined')await navigator.clipboard.write([new ClipboardItem({'text/plain':new Blob([text],{type:'text/plain'}),'text/html':new Blob([html],{type:'text/html'})})]);
+  else await navigator.clipboard.writeText(text);
+  alert(successMessage);
+ }catch(_error){
+  try{await navigator.clipboard.writeText(text);alert(successMessage)}catch(_fallbackError){alert('Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.')}
+ }
 }
 function n(id){return parseFloat(document.getElementById(id).value)||0}
 function i(id){return parseInt(document.getElementById(id).value)||0}
