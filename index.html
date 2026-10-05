@@ -970,14 +970,15 @@ function updateReissueCalculation(){
  const exemptMarkup=document.getElementById('reissueExemptMarkup').checked;
  const exemptDu=document.getElementById('reissueExemptDu').checked;
  const markup=exemptMarkup?0:adjustment;
- const duBeforeTax=exemptDu?0:adjustment;
+ const fareWithMarkup=money(withoutMarkup+markup);
+ const duAdjustment=fareWithMarkup!==0?money(Math.max(Math.abs(fareWithMarkup)*(percent/100),minimumMarkup)):0;
+ const duBeforeTax=exemptDu?0:duAdjustment;
  const du=taxDifference<0?money(Math.max(0,duBeforeTax+taxDifference)):duBeforeTax;
  const taxInTotal=Math.max(0,taxDifference);
- const fareWithMarkup=money(withoutMarkup+markup);
  const total=money(fareWithMarkup+taxInTotal+du+penalty);
  const optional=id=>document.getElementById(id).value===''?'N/A':br(n(id));
  const markupText=exemptMarkup||markup===0?'N/A':br(markup);
- const duText=exemptDu||adjustment===0?'N/A':br(du);
+ const duText=exemptDu||duAdjustment===0?'N/A':br(du);
  document.getElementById('personFareDifference').textContent=br(fareWithMarkup);
  document.getElementById('personTaxDifference').textContent=optional('reissueTaxDifference');
  document.getElementById('personDu').textContent=duText;
