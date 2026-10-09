@@ -60,9 +60,29 @@ Deno.serve(async (request) => {
     trigger,
   })
   if (claimError?.code === '23505') {
-    return json({ ok: true, skipped: true, reason: 'Esta janela diária já foi processada.', slot })
+    const { data: reclaimed, error: reclaimError } = await admin
+      .from('exchange_rate_runs')
+      .update({
+        status: 'running',
+        trigger,
+        attempted_at: new Date().toISOString(),
+        completed_at: null,
+        error_message: null,
+      })
+      .eq('run_date', schedule.runDate)
+      .eq('slot', slot)
+      .eq('status', 'failed')
+      .select('slot')
+      .maybeSingle()
+    if (reclaimError) {
+      console.error('Falha ao retomar execução PTAX:', reclaimError.message)
+      return json({ error: 'Não foi possível retomar a consulta anterior.' }, 500)
+    }
+    if (!reclaimed) {
+      return json({ ok: true, skipped: true, reason: 'Esta janela diária já foi processada.', slot })
+    }
   }
-  if (claimError) {
+  if (claimError && claimError.code !== '23505') {
     console.error('Falha ao registrar execução PTAX:', claimError.message)
     return json({ error: 'Não foi possível controlar a execução da consulta.' }, 500)
   }

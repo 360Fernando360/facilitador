@@ -40,6 +40,7 @@ Deno.test('consulta um período retroativo em vez de assumir o dia anterior', ()
   assertEquals(url.includes("@moeda='USD'"), true)
   assertEquals(url.includes("@dataInicial='08-11-2026'"), true)
   assertEquals(url.includes("@dataFinalCotacao='09-25-2026'"), true)
+  assertEquals(url.includes('$select'), false)
 })
 
 Deno.test('falha da API é propagada sem criar cotação inventada', async () => {

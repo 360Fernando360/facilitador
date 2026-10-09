@@ -38,7 +38,6 @@ export function buildPtaxUrl(endDate = new Date(), lookbackDays = 45): string {
     '@dataInicial': `'${formatPtaxDate(startDate)}'`,
     '@dataFinalCotacao': `'${formatPtaxDate(endDate)}'`,
     '$format': 'json',
-    '$select': 'cotacaoVenda,dataHoraCotacao,tipoBoletim',
   })
   return `${PTAX_ENDPOINT}?${parameters.toString()}`
 }
