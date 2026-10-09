@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.update-ptax]
 verify_jwt = false
+
+[functions.credential-vault]
+verify_jwt = false
