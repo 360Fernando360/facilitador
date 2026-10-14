@@ -24,9 +24,25 @@ const values = {
 assertEquals(calculator.totals(values), { usd: 20, brl: 108.64 }, 'totais nas duas moedas');
 
 const copied = calculator.copyText(values, 5.4321);
-assertEquals(copied.split('\n').slice(0, 3), ['Câmbio: 5,4321', 'VALOR POR PESSOA', ''], 'ordem do cabeçalho copiado');
-for (const expected of ['VALOR POR PESSOA', 'Câmbio: 5,4321', 'Diferença de tarifa: USD 10,00 | BRL 54,32', 'TOTAL: USD 20,00 | BRL 108,64']) {
+assertEquals(copied.split('\n').slice(0, 3), ['Câmbio: 5,4321', 'VALORES POR PESSOA', ''], 'ordem do cabeçalho copiado');
+for (const expected of ['VALORES POR PESSOA', 'Câmbio: 5,4321', 'Diferença de tarifa: USD 10,00 | BRL  54,32', 'TOTAL..............: USD 20,00 | BRL 108,64']) {
   if (!copied.includes(expected)) throw new Error(`texto de cópia sem: ${expected}`);
 }
 
-console.log('Testes da calculadora internacional: 7 cenários aprovados.');
+const varied = calculator.copyText({
+  fareDifference: { usd: 0, brl: 12345.67 },
+  taxDifference: { usd: 125.5, brl: 0 },
+  penalty: { usd: 12345.67, brl: 125.5 },
+  trustFee: { usd: 0, brl: 0 },
+  agencyDu: { usd: 0, brl: 0 },
+}, 5.0096);
+const variedRows = varied.split('\n').slice(3);
+assertEquals(variedRows[0], 'Diferença de tarifa: USD      0,00 | BRL 12.345,67', 'alinhamento com BRL longo');
+assertEquals(variedRows[1], 'Diferença de taxa..: USD    125,50 | BRL      0,00', 'alinhamento com valor intermediário');
+assertEquals(variedRows[2], 'Multa..............: USD 12.345,67 | BRL    125,50', 'alinhamento com USD longo');
+const colonColumns = new Set(variedRows.map((line) => line.indexOf(':')));
+const separatorColumns = new Set(variedRows.map((line) => line.indexOf('|')));
+assertEquals([...colonColumns], [19], 'dois-pontos na mesma coluna');
+assertEquals(separatorColumns.size, 1, 'separador na mesma coluna');
+
+console.log('Testes da calculadora internacional: 13 cenários aprovados.');

@@ -34,12 +34,25 @@
 
   function copyText(values, rate) {
     const total = totals(values);
+    const rows = [
+      ...FIELD_LABELS.map(([key, label]) => ({
+        label,
+        usd: formatAmount(values[key]?.usd),
+        brl: formatAmount(values[key]?.brl),
+      })),
+      { label: 'TOTAL', usd: formatAmount(total.usd), brl: formatAmount(total.brl) },
+    ];
+    const labelWidth = Math.max(...rows.map(({ label }) => label.length));
+    const usdWidth = Math.max(...rows.map(({ usd }) => usd.length));
+    const brlWidth = Math.max(...rows.map(({ brl }) => brl.length));
+    const formattedRows = rows.map(({ label, usd, brl }) =>
+      `${label.padEnd(labelWidth, '.')}: USD ${usd.padStart(usdWidth)} | BRL ${brl.padStart(brlWidth)}`
+    );
     return [
       `Câmbio: ${Number(rate).toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}`,
-      'VALOR POR PESSOA',
+      'VALORES POR PESSOA',
       '',
-      ...FIELD_LABELS.map(([key, label]) => `${label}: USD ${formatAmount(values[key]?.usd)} | BRL ${formatAmount(values[key]?.brl)}`),
-      `TOTAL: USD ${formatAmount(total.usd)} | BRL ${formatAmount(total.brl)}`,
+      ...formattedRows,
     ].join('\n');
   }
 
