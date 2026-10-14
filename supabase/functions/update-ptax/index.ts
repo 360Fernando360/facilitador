@@ -1,5 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { fetchLatestClosingRate, getSaoPauloSchedule, type PtaxSlot } from '../_shared/ptax.ts'
+import { hasValidDailySession } from '../_shared/daily-session.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -36,6 +37,9 @@ Deno.serve(async (request) => {
     const accessToken = request.headers.get('Authorization')?.replace(/^Bearer\s+/i, '') ?? ''
     const { data: userData, error: userError } = await admin.auth.getUser(accessToken)
     if (userError || !userData.user) return json({ error: 'Chamada não autorizada.' }, 401)
+    if (!(await hasValidDailySession(admin, accessToken, userData.user.id))) {
+      return json({ error: 'A sessão diária terminou. Entre novamente.' }, 401)
+    }
     const { data: membership } = await admin
       .from('organization_members')
       .select('user_id')

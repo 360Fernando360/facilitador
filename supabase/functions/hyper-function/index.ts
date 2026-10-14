@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { hasValidDailySession } from '../_shared/daily-session.ts'
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
@@ -32,6 +33,9 @@ Deno.serve(async (request) => {
 
   const { data: userData, error: userError } = await admin.auth.getUser(token)
   if (userError || !userData.user) return json({ error: 'Sessão inválida ou expirada.' }, 401)
+  if (!(await hasValidDailySession(admin, token, userData.user.id))) {
+    return json({ error: 'A sessão diária terminou. Entre novamente.' }, 401)
+  }
 
   const { data: membership, error: membershipError } = await admin
     .from('organization_members')

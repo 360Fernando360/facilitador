@@ -6,6 +6,7 @@ import {
   encryptCredential,
   type EncryptedValue,
 } from "../_shared/credential-crypto.ts";
+import { hasValidDailySession } from "../_shared/daily-session.ts";
 
 const PRODUCTION_ORIGIN = "https://360fernando360.github.io";
 // Somente a versão 1 é suportada. Uma nova versão deve adicionar sua própria
@@ -240,6 +241,9 @@ Deno.serve(async (request) => {
     );
     if (userError || !userData.user) {
       throw new HttpError(401, "Sessão inválida ou expirada.");
+    }
+    if (!(await hasValidDailySession(admin, accessToken, userData.user.id))) {
+      throw new HttpError(401, "A sessão diária terminou. Entre novamente.");
     }
 
     const { data: membership, error: membershipError } = await admin

@@ -424,6 +424,12 @@ let currentUserId=null;
 let currentAppPage='home';
 let activityHeartbeatId=null;
 let membershipValidationId=null;
+let dailySessionTimerId=null;
+let dailySessionDeadline=null;
+let dailySessionEnding=false;
+const DAILY_SESSION_MESSAGE='Sua sessão diária terminou. Entre novamente para continuar.';
+const DAILY_SESSION_EVENT_KEY='facilitador-daily-session-event';
+const dailySessionChannel=typeof BroadcastChannel==='function'?new BroadcastChannel('facilitador-auth'):null;
 let adminActivityRefreshId=null;
 let activityTrackingAvailable=true;
 let organizationMembersCache=[];
@@ -444,6 +450,69 @@ function setLoginLoading(loading){
  const loader=button.querySelector('.button-loader');
  loader.classList.toggle('hidden',!loading);
  loader.classList.toggle('spinner',loading);
+}
+function clearDailySessionTimer(){
+ if(dailySessionTimerId)clearTimeout(dailySessionTimerId);
+ dailySessionTimerId=null;dailySessionDeadline=null;
+}
+function clearAuthenticatedSessionData(){
+ stopActivityTracking();clearDailySessionTimer();window.MyAccesses?.reset();
+ currentMembership=null;currentUserId=null;organizationMembersCache=[];
+ document.getElementById('companyName').textContent='';
+ document.getElementById('welcomeName').textContent='colaborador';
+ document.getElementById('adminButton').classList.add('hidden');
+ document.getElementById('page-admin').classList.add('hidden');
+ document.getElementById('memberList')?.replaceChildren();
+ document.getElementById('usageTableBody')?.replaceChildren();
+}
+function broadcastSessionEnd(reason){
+ const event={type:'session-ended',reason,at:Date.now()};
+ dailySessionChannel?.postMessage(event);
+ try{localStorage.setItem(DAILY_SESSION_EVENT_KEY,JSON.stringify(event));localStorage.removeItem(DAILY_SESSION_EVENT_KEY)}catch(_error){}
+}
+async function endSession(reason='manual',notifyOtherTabs=true){
+ if(dailySessionEnding)return;
+ dailySessionEnding=true;
+ try{
+   clearAuthenticatedSessionData();
+   if(notifyOtherTabs)broadcastSessionEnd(reason);
+   if(supabaseClient){
+     const signOutOptions=reason==='daily-expired'?{scope:'local'}:undefined;
+     await supabaseClient.auth.signOut(signOutOptions).catch(()=>{});
+   }
+   showScreen('login');
+   setLoginMessage(reason==='daily-expired'?DAILY_SESSION_MESSAGE:'');
+   document.getElementById('loginPassword').value='';
+   document.getElementById('loginUser').focus();
+ }finally{dailySessionEnding=false}
+}
+function handleSessionEndEvent(event){
+ if(event?.type!=='session-ended')return;
+ endSession(event.reason==='daily-expired'?'daily-expired':'manual',false);
+}
+dailySessionChannel?.addEventListener('message',event=>handleSessionEndEvent(event.data));
+window.addEventListener('storage',event=>{if(event.key===DAILY_SESSION_EVENT_KEY&&event.newValue){try{handleSessionEndEvent(JSON.parse(event.newValue))}catch(_error){}}});
+function scheduleDailySessionEnd(deadline){
+ clearDailySessionTimer();dailySessionDeadline=deadline;
+ const remaining=deadline-Date.now();
+ if(remaining<=0){endSession('daily-expired');return}
+ dailySessionTimerId=setTimeout(()=>endSession('daily-expired'),Math.min(remaining,2147483647));
+}
+function isDailySessionRpcUnavailable(error){
+ const message=[error?.message,error?.details,error?.hint].filter(Boolean).join(' ').toLowerCase();
+ return ['42883','PGRST202'].includes(error?.code)&&message.includes('get_daily_session_deadline');
+}
+async function validateDailySession(session){
+ if(!session?.user)return false;
+ const {data,error}=await supabaseClient.rpc('get_daily_session_deadline');
+ if(isDailySessionRpcUnavailable(error)){clearDailySessionTimer();return true}
+ const deadline=typeof data==='string'?Date.parse(data):NaN;
+ if(error||!Number.isFinite(deadline)||Date.now()>=deadline){await endSession('daily-expired');return false}
+ scheduleDailySessionEnd(deadline);return true;
+}
+async function validateCurrentDailySession(){
+ const {data:{session}}=await supabaseClient.auth.getSession();
+ return validateDailySession(session);
 }
 function togglePassword(){
  const input=document.getElementById('loginPassword');
@@ -525,16 +594,7 @@ async function login(event){
  finally{setLoginLoading(false)}
 }
 async function logout(){
- stopActivityTracking();
- window.MyAccesses?.reset();
- if(supabaseClient)await supabaseClient.auth.signOut();
- currentMembership=null;
- currentUserId=null;
- document.getElementById('adminButton').classList.add('hidden');
- document.getElementById('page-admin').classList.add('hidden');
- document.getElementById('loginError').textContent='';
- showScreen('login');
- document.getElementById('loginUser').focus();
+ await endSession('manual');
 }
 function isMissingMembershipActiveColumn(error){
  const message=[error?.message,error?.details,error?.hint].filter(Boolean).join(' ').toLowerCase();
@@ -556,7 +616,8 @@ async function loadSessionMembership(userId){
  return result;
 }
 async function applySession(session){
- if(!session){stopActivityTracking();window.MyAccesses?.reset();currentMembership=null;document.getElementById('companyName').textContent='';document.getElementById('adminButton').classList.add('hidden');showScreen('login');return}
+ if(!session){clearAuthenticatedSessionData();showScreen('login');return}
+ if(!(await validateDailySession(session)))return;
  const {data:membership,error}=await loadSessionMembership(session.user.id);
  if(error){
    await supabaseClient.auth.signOut();
@@ -611,11 +672,14 @@ async function initializeAuthentication(){
      setTimeout(()=>applySession(null),0);
      return;
    }
-   if(event==='SIGNED_IN'){
+   if(event==='SIGNED_IN'||event==='TOKEN_REFRESHED'){
      // O Supabase pode repetir SIGNED_IN ao voltar para esta aba. Nesse caso,
      // a aplicação já está montada e a página em uso deve ser preservada.
-     if(nextSession?.user.id===currentUserId&&currentMembership)return;
-     setTimeout(()=>applySession(nextSession),0);
+     setTimeout(async()=>{
+       if(!(await validateDailySession(nextSession)))return;
+       if(nextSession?.user.id===currentUserId&&currentMembership)return;
+       await applySession(nextSession);
+     },0);
    }
  });
  const {data:{session}}=await supabaseClient.auth.getSession();
@@ -742,9 +806,14 @@ function startAdminActivityRefresh(){
  if(adminActivityRefreshId)clearInterval(adminActivityRefreshId);
  adminActivityRefreshId=setInterval(()=>{if(currentAppPage==='admin'&&document.visibilityState==='visible')loadActivityDashboard()},30000);
 }
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&currentMembership){validateActiveMembership();trackActivity(false)}});
+document.addEventListener('visibilitychange',async()=>{
+ if(document.visibilityState!=='visible'||!currentMembership)return;
+ if(!(await validateCurrentDailySession()))return;
+ await validateActiveMembership();trackActivity(false);
+});
 async function showPage(page,validateMembership=true){
  if(page==='admin'&&currentMembership?.role!=='admin')return;
+ if(validateMembership&&currentMembership&&!(await validateCurrentDailySession()))return;
  if(validateMembership&&currentMembership&&!(await validateActiveMembership()))return;
  if(currentAppPage==='accesses'&&page!=='accesses')window.MyAccesses?.leave();
  document.querySelectorAll('.app-page').forEach(section=>section.classList.add('hidden'));
