@@ -88,6 +88,7 @@ input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:9
 @media(max-width:420px){.login{padding:0}.login-shell{border:0;border-radius:0;min-height:100vh}.login-card{padding:32px 22px;min-height:100vh}.login-title{font-size:24px}}
 </style>
 <link rel="stylesheet" href="./my-accesses.css">
+<link rel="stylesheet" href="./quotation-builder.css">
 </head>
 <body>
 <section id="login" class="screen active">
@@ -290,6 +291,21 @@ input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:9
 <div class="international-heading"><div><h1>Atendimento Internacional</h1><p class="muted">Consulte e copie as regras das famílias tarifárias por companhia aérea.</p></div><div class="international-controls"><div class="field"><label for="internationalSearch">Buscar companhia</label><input id="internationalSearch" type="search" placeholder="Nome ou código" oninput="filterInternationalAirlines()"></div><div class="field"><label for="internationalAirline">Companhia aérea</label><select id="internationalAirline" onchange="selectInternationalAirline()"></select></div></div></div>
 <section class="card international-banner"><span id="internationalCode" class="international-code">INTER</span><h2 id="internationalName">Selecione uma companhia</h2><p id="internationalReference"></p></section>
 <section class="card"><h2>Perfis de tarifa</h2><p class="muted">Selecione um perfil para consultar assento, bagagens, alteração, reembolso e demais regras disponíveis.</p><div id="internationalProfiles" class="international-profile-grid"></div><div id="internationalFareDescription" class="international-description"><div class="international-empty">Selecione uma companhia e um perfil.</div></div></section>
+<section id="quotationBuilder" class="card quote-module">
+<div class="quote-module-head"><div><h2>Cotação</h2><p class="muted">Combine o texto original do GDS com perfis de tarifa e textos complementares.</p></div><button id="quotationManageButton" class="btn secondary quote-management-button hidden" type="button">⚙ Gerenciar textos</button></div>
+<div id="quotationBuilderWorkspace">
+<div class="quote-setup"><div class="field"><label for="quotationGds">GDS</label><select id="quotationGds"><option value="">Selecione</option><option>Amadeus</option><option>Sabre</option><option>Galileo</option></select></div><div class="field"><label for="quotationAirline">Companhia aérea</label><select id="quotationAirline"></select></div></div>
+<div class="field quote-source"><label for="quotationSource">Texto original do GDS</label><textarea id="quotationSource" spellcheck="false" placeholder="Cole aqui a cotação exatamente como foi copiada do GDS."></textarea></div>
+<div class="quote-workspace"><div class="quote-available">
+<section class="quote-panel"><div class="quote-panel-head"><h3>Textos complementares</h3><span class="small muted">Ativos para a companhia</span></div><div id="quotationTexts" class="quote-options"></div></section>
+<section class="quote-panel"><div class="quote-panel-head"><h3>Perfis de tarifa</h3><span class="small muted">Cadastro existente</span></div><div id="quotationProfiles" class="quote-options"></div></section>
+</div><section class="quote-preview"><div class="quote-preview-head"><h3>Prévia da cotação</h3><span id="quotationBlockCount" class="quote-count">0 blocos</span></div><pre id="quotationPreview" class="quote-preview-output quote-preview-placeholder"></pre><div id="quotationBlocks" class="quote-blocks"></div><div class="quote-preview-actions"><button id="quotationClear" class="btn secondary" type="button">Limpar</button><button id="quotationCopy" class="btn primary" type="button">Copiar cotação</button></div></section></div>
+<div id="quotationMessage" class="quote-message" role="status" aria-live="polite"></div></div>
+<section id="quotationManager" class="quote-manager hidden"><div class="quote-manager-head"><div><h3>Textos complementares por companhia</h3><p class="small muted">Administradores e gestores podem cadastrar, editar, ativar e desativar.</p></div><button id="quotationManagerClose" class="btn secondary" type="button">Voltar à cotação</button></div><div class="quote-manager-layout">
+<form id="quotationManagerForm" class="quote-manager-form"><h3 id="quotationManagerFormTitle">Novo texto complementar</h3><div class="field"><label for="quotationManagerAirline">Companhia aérea</label><select id="quotationManagerAirline"></select></div><div class="field"><label for="quotationManagerTitle">Título do bloco</label><input id="quotationManagerTitle" maxlength="120" required></div><div class="field"><label for="quotationManagerContent">Conteúdo</label><textarea id="quotationManagerContent" maxlength="5000" required></textarea></div><div class="quote-manager-active"><input id="quotationManagerActive" type="checkbox" checked><label for="quotationManagerActive">Texto ativo</label></div><div class="quote-manager-actions"><button id="quotationManagerCancel" class="btn secondary hidden" type="button">Cancelar edição</button><button id="quotationManagerSave" class="btn primary" type="submit">Salvar texto</button></div><div id="quotationManagerMessage" class="quote-message" role="status" aria-live="polite"></div></form>
+<section class="quote-manager-list-panel"><div class="quote-panel-head"><h3>Textos cadastrados</h3><span class="small muted">Ativos e inativos</span></div><div id="quotationManagerList" class="quote-manager-list"></div></section>
+</div></section>
+</section>
 <section class="card international-reissue"><div class="panel-title"><div><h2>Calculadora de reemissão internacional</h2><p class="small muted international-reissue-help">Preencha USD ou BRL; o outro valor será calculado automaticamente pela PTAX do dia.</p></div><div class="reissue-exchange" aria-label="PTAX usada na calculadora internacional"><span>USD PTAX venda</span><strong id="internationalReissueExchangeValue">—</strong><small id="internationalReissueExchangeMeta">Carregando...</small></div></div>
 <div class="international-reissue-layout"><div class="international-reissue-calculator">
 <div class="international-currency-grid"><div class="international-currency-head">Descrição</div><div class="international-currency-head">Valor em dólar (USD)</div><div class="international-currency-head">Valor em reais (BRL)</div>
@@ -411,6 +427,7 @@ Passo4.: Contato com a Central de Atendimento para envio da documentação, inse
 <script src="./exchange-rates.js"></script>
 <script src="./international-reissue.js"></script>
 <script src="./my-accesses.js"></script>
+<script src="./quotation-builder.js"></script>
 <script>
 const SUPABASE_URL=window.SUPABASE_CONFIG?.url||'';
 const SUPABASE_PUBLISHABLE_KEY=window.SUPABASE_CONFIG?.publishableKey||'';
@@ -456,7 +473,7 @@ function clearDailySessionTimer(){
  dailySessionTimerId=null;dailySessionDeadline=null;
 }
 function clearAuthenticatedSessionData(){
- stopActivityTracking();clearDailySessionTimer();window.MyAccesses?.reset();
+ stopActivityTracking();clearDailySessionTimer();window.MyAccesses?.reset();window.QuotationBuilder?.reset();
  currentMembership=null;currentUserId=null;organizationMembersCache=[];
  document.getElementById('companyName').textContent='';
  document.getElementById('welcomeName').textContent='colaborador';
@@ -631,6 +648,7 @@ async function applySession(session){
    showScreen('login');
    return;
  }
+ if(currentMembership?.organization_id!==membership.organization_id)window.QuotationBuilder?.reset();
  currentMembership=membership;
  currentUserId=session.user.id;
  document.getElementById('companyName').textContent=membership.organization.name;
@@ -651,7 +669,7 @@ async function validateActiveMembership(){
  // operações sensíveis continuam protegidas no servidor pela RLS/Edge Function.
  if(error)return true;
  if(data?.is_active&&data.organization_id===expectedOrganizationId)return true;
- stopActivityTracking();window.MyAccesses?.reset();currentMembership=null;currentUserId=null;
+ stopActivityTracking();window.MyAccesses?.reset();window.QuotationBuilder?.reset();currentMembership=null;currentUserId=null;
  document.getElementById('companyName').textContent='';document.getElementById('adminButton').classList.add('hidden');document.getElementById('page-admin').classList.add('hidden');
  await supabaseClient.auth.signOut();showScreen('login');document.getElementById('loginError').textContent='Seu acesso a esta empresa está desativado.';return false;
 }
@@ -825,6 +843,7 @@ async function showPage(page,validateMembership=true){
  window.scrollTo({top:0,behavior:'smooth'});
  if(page==='home')loadDashboard();
  if(page==='accesses')window.MyAccesses?.open(supabaseClient,currentUserId);
+ if(page==='inter')window.QuotationBuilder?.open(supabaseClient,{organizationId:currentMembership?.organization_id,userId:currentUserId,role:currentMembership?.role});
  if(page==='admin'){loadMembers();startAdminActivityRefresh()}else if(adminActivityRefreshId){clearInterval(adminActivityRefreshId);adminActivityRefreshId=null}
  if(page==='nacional'){
    const airline=document.getElementById('nationalAirline').value;
