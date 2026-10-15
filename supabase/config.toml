@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.credential-vault]
 verify_jwt = false
+
+[functions.customer-search-proxy]
+verify_jwt = false
