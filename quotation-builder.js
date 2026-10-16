@@ -262,7 +262,7 @@
       const key = selectedBlockKey('text', item.id);
       const row = element('div', 'quote-option');
       const info = element('div', 'quote-option-info');
-      info.append(element('strong', '', item.title), element('span', '', item.content.replace(/\s+/g, ' ').slice(0, 110)));
+      info.append(element('strong', '', item.title), element('span', '', 'Texto complementar disponível para inclusão na cotação.'));
       const button = element('button', 'btn secondary', hasBlock(key) ? 'Incluído ✓' : '+ Incluir texto');
       button.type = 'button';
       button.disabled = hasBlock(key);

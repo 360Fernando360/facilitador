@@ -48,6 +48,9 @@ Deno.test('frontend mantém perfil e texto complementar como fontes separadas', 
   assert(js.includes("selectedBlockKey('profile'"), 'Perfil deve usar um bloco próprio.');
   assert(js.includes("selectedBlockKey('text'"), 'Texto deve usar um bloco próprio.');
   assert(js.includes('if (hasBlock(block.key)) return'), 'Deve impedir a inclusão duplicada.');
+  assert(js.includes('Texto complementar disponível para inclusão na cotação.'), 'O cartão deve usar uma descrição compacta.');
+  assert(!js.includes("item.content.replace(/\\s+/g, ' ').slice(0, 110)"), 'O cartão não deve exibir um trecho do conteúdo cadastrado.');
+  assert(js.includes('content: `${item.title.toLocaleUpperCase(\'pt-BR\')}\\n${item.content}`'), 'A inclusão deve preservar o conteúdo integral do texto.');
   assert(js.includes('navigator.clipboard.writeText(text)'), 'A cópia deve usar a composição da prévia.');
 });
 
