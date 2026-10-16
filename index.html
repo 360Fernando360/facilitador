@@ -819,8 +819,15 @@ function clearInternationalReissue(){
  renderInternationalReissueSummary();document.getElementById('international-fareDifference-usd').focus();
 }
 async function copyInternationalReissue(){
- const text=document.getElementById('internationalReissueCopy').textContent;
- try{await navigator.clipboard.writeText(text);alert('Cálculo internacional copiado.')}catch(_error){alert('Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.')}
+ const rate=internationalReissueRate(),values=internationalReissueValues();
+ const text=window.InternationalReissue.copyText(values,rate),html=window.InternationalReissue.copyHtml(values,rate);
+ try{
+  if(navigator.clipboard.write&&typeof ClipboardItem!=='undefined')await navigator.clipboard.write([new ClipboardItem({'text/plain':new Blob([text],{type:'text/plain'}),'text/html':new Blob([html],{type:'text/html'})})]);
+  else await navigator.clipboard.writeText(text);
+  alert('Cálculo internacional copiado.');
+ }catch(_error){
+  try{await navigator.clipboard.writeText(text);alert('Cálculo internacional copiado.')}catch(_fallbackError){alert('Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.')}
+ }
 }
 const APP_PAGE_LABELS={home:'Início',emissao:'Emissão',inter:'Atendimento Internacional',nacional:'Atendimento Nacional',accesses:'Meus Acessos',plantao:'Plantão',comercial:'Comercial',admin:'Administração'};
 async function trackActivity(newSession=false){

@@ -56,5 +56,25 @@
     ].join('\n');
   }
 
-  global.InternationalReissue = Object.freeze({ FIELD_LABELS, convert, totals, copyText });
+  function copyHtml(values, rate) {
+    const total = totals(values);
+    const rows = [
+      ...FIELD_LABELS.map(([key, label]) => ({
+        label,
+        usd: formatAmount(values[key]?.usd),
+        brl: formatAmount(values[key]?.brl),
+        total: false,
+      })),
+      { label: 'TOTAL', usd: formatAmount(total.usd), brl: formatAmount(total.brl), total: true },
+    ];
+    const cells = rows.map(({ label, usd, brl, total: isTotal }) => {
+      const weight = isTotal ? 'font-weight:700;' : '';
+      const border = isTotal ? 'border-top:1px solid #64748b;' : '';
+      return `<tr><td style="padding:2px 14px 2px 0;${weight}${border}">${label}</td><td style="padding:2px 14px 2px 0;text-align:right;white-space:nowrap;${weight}${border}">USD&nbsp;${usd}</td><td style="padding:2px 0;text-align:right;white-space:nowrap;${weight}${border}">BRL&nbsp;${brl}</td></tr>`;
+    }).join('');
+    const formattedRate = Number(rate).toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+    return `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.35;color:#111827"><div>Câmbio: ${formattedRate}</div><div style="font-weight:700;margin:2px 0 12px">VALORES POR PESSOA</div><table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#111827"><tbody>${cells}</tbody></table></div>`;
+  }
+
+  global.InternationalReissue = Object.freeze({ FIELD_LABELS, convert, totals, copyText, copyHtml });
 })(typeof window === 'undefined' ? globalThis : window);

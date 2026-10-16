@@ -45,4 +45,10 @@ const separatorColumns = new Set(variedRows.map((line) => line.indexOf('|')));
 assertEquals([...colonColumns], [19], 'dois-pontos na mesma coluna');
 assertEquals(separatorColumns.size, 1, 'separador na mesma coluna');
 
-console.log('Testes da calculadora internacional: 13 cenários aprovados.');
+const copiedHtml = calculator.copyHtml(values, 5.4321);
+for (const expected of ['<table', 'Câmbio: 5,4321', 'VALORES POR PESSOA', 'Diferença de tarifa', 'USD&nbsp;10,00', 'BRL&nbsp;54,32', 'TOTAL', 'font-weight:700']) {
+  if (!copiedHtml.includes(expected)) throw new Error(`HTML de cópia sem: ${expected}`);
+}
+if (copiedHtml.includes('undefined')) throw new Error('HTML de cópia contém valor indefinido');
+
+console.log('Testes da calculadora internacional: 22 cenários aprovados.');
