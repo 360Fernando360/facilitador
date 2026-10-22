@@ -1378,7 +1378,7 @@ function generate(){
         const saldoIndividual=money((fare+tax)-faturadoIndividual);
         const parcelaIndividual=money(saldoIndividual/p);
         const tarifaMenosParcela=money(fare-parcelaIndividual);
-        lines.push(`50/*${faturadoIndividual.toFixed(2)}\nFMP${b}${card}/${val}*Z${auth}*MSPL${String(p).padStart(2,'0')}X${ot}X${mspl}//${tarifaMenosParcela.toFixed(2)}/${tax.toFixed(2)}XT`);
+        lines.push(`50/*${faturadoIndividual.toFixed(2)}BRL\nFMP${b}${card}/${val}*Z${auth}*MSPL${String(p).padStart(2,'0')}X${ot}X${mspl}//${tarifaMenosParcela.toFixed(2)}/${tax.toFixed(2)}XT`);
       } else {
         lines.push(`FMP${b}${card}/${val}*Z${auth}*MSPL${String(p).padStart(2,'0')}X${ot}X${mspl}//${res.toFixed(2)}`);
       }
