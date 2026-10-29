@@ -2,6 +2,7 @@
 .international-fares-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
 .international-fares-card-head h2{margin:0;color:var(--navy)}
 .international-fares-card-head p{margin:5px 0 0}
+.international-fare-admin-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .international-fare-manage{flex:none;padding:9px 12px}
 .international-fare-status{min-height:18px;margin:-7px 0 10px;font-size:12px;font-weight:700;color:var(--muted)}
 .international-fare-status.success{color:#15803d}.international-fare-status.error{color:#b91c1c}
@@ -35,5 +36,14 @@
 .international-updated-badge{padding:5px 8px;border-radius:999px;background:#e0e7ff;color:#3730a3;font-size:10px;font-weight:800}
 .international-report-button{border:1px solid #fca5a5!important;color:#b91c1c!important;background:#fff!important}
 .international-report-button:disabled{opacity:.65;cursor:wait}
+.international-profile-delete,.international-profile-restore{border:1px solid #fca5a5!important;color:#b91c1c!important;background:#fff!important}
+.international-profile-dialog{width:min(900px,calc(100% - 28px));max-height:92vh;padding:0;border:0;border-radius:14px;box-shadow:0 28px 80px #0f172a55;color:var(--text)}
+.international-profile-dialog::backdrop{background:#0f172a88;backdrop-filter:blur(2px)}
+.international-profile-form{padding:22px}.international-profile-dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:18px}.international-profile-dialog-head h2{margin:0;color:var(--navy)}.international-profile-dialog-head p{margin:5px 0 0}
+.international-profile-dialog-close{width:34px;height:34px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:25px;cursor:pointer}.international-profile-dialog-close:hover{background:#f1f5f9;color:var(--navy)}
+.international-profile-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}.international-profile-form-grid .field{margin:0}.international-profile-form-grid textarea{width:100%;min-height:72px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;resize:vertical;font:inherit}.international-profile-form-grid textarea:focus{outline:0;border-color:var(--blue);box-shadow:0 0 0 4px #2563eb1a}
+.international-profile-audit-note{margin-top:16px;padding:11px 13px;border:1px solid #bfdbfe;border-radius:9px;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:700}.international-profile-form-message{min-height:18px;margin-top:8px;color:#b91c1c;font-size:12px;font-weight:700}
+.international-profile-dialog-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px}.international-profile-dialog-actions>div{display:flex;gap:8px}
+.international-deleted-profiles{margin-top:12px;padding:12px;border:1px dashed #cbd5e1;border-radius:10px;background:#f8fafc}.international-deleted-profiles h3{margin:0 0 9px;color:var(--navy);font-size:13px}.international-deleted-list{display:grid;gap:6px}.international-deleted-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:11px;font-weight:700}.international-deleted-row .btn{padding:6px 9px;font-size:10px}
 @media(max-width:1050px){.international-profile-groups{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:650px){.international-fares-card-head{flex-direction:column}.international-fare-manage{width:100%}.international-profile-groups{grid-template-columns:1fr}.international-description-head{align-items:flex-start;flex-direction:column}.international-description-actions{width:100%}.international-description-actions .btn{flex:1}}
+@media(max-width:650px){.international-fares-card-head{flex-direction:column}.international-fare-admin-actions,.international-fare-admin-actions .btn{width:100%}.international-profile-groups,.international-profile-form-grid{grid-template-columns:1fr}.international-description-head{align-items:flex-start;flex-direction:column}.international-description-actions{width:100%}.international-description-actions .btn{flex:1}.international-profile-dialog-actions{align-items:stretch;flex-direction:column}.international-profile-dialog-actions>div,.international-profile-dialog-actions .btn{width:100%}.international-profile-dialog-actions .btn{flex:1}}

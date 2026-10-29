@@ -54,3 +54,15 @@ Deno.test('migração isola empresas e restringe reclassificação a administrad
   assert(sql.includes('public.is_organization_admin(organization_id)'), 'Somente administradores podem reclassificar.');
   assert(sql.includes('members can report outdated international fares'), 'Membros devem poder reportar regras desatualizadas.');
 });
+
+Deno.test('gestão de conteúdo permite criar, editar, excluir e restaurar sem apagar a base', async () => {
+  const js = await Deno.readTextFile(`${root}/international-fare-profiles.js`);
+  const sql = await Deno.readTextFile(`${root}/supabase/migrations/20261029143000_international_fare_profile_content_management.sql`);
+  for (const functionName of ['openProfileEditor', 'saveProfileContent', 'deleteProfile', 'restoreDeletedProfile', 'restoreOriginalProfile']) {
+    assert(js.includes(`function ${functionName}`), `Falta o fluxo ${functionName}.`);
+  }
+  assert(sql.includes('is_custom boolean not null default false'), 'Perfis novos devem ser identificados sem alterar a base estática.');
+  assert(sql.includes('is_active boolean not null default true'), 'A exclusão deve ser lógica e reversível.');
+  assert(sql.includes('fields jsonb'), 'As regras editadas devem ser armazenadas de forma estruturada.');
+  assert(!js.includes(".delete().eq('organization_id'"), 'Excluir perfil não deve remover registros fisicamente.');
+});

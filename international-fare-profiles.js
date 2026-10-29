@@ -67,6 +67,30 @@
     };
   }
 
+  function effectiveProfile(entry) {
+    const saved = state.settings.get(entry.key);
+    if (!saved) return entry.profile;
+    return {
+      ...entry.profile,
+      name: saved.profile_name || entry.profile.name,
+      fields: saved.fields && typeof saved.fields === 'object' ? saved.fields : entry.profile.fields,
+      shortCode: saved.short_code || entry.profile.shortCode || '',
+    };
+  }
+
+  function availableProfileEntries(includeInactive = false) {
+    const base = profileEntries(state.company).map((entry) => ({ ...entry, profile: effectiveProfile(entry) }));
+    const custom = [...state.settings.values()]
+      .filter((saved) => saved.is_custom)
+      .map((saved) => ({
+        key: saved.profile_key,
+        index: -1,
+        custom: true,
+        profile: { name: saved.profile_name, fields: saved.fields || {}, shortCode: saved.short_code || '' },
+      }));
+    return [...base, ...custom].filter((entry) => includeInactive || state.settings.get(entry.key)?.is_active !== false);
+  }
+
   function formatDate(value) {
     if (!value) return 'Data de revisão não informada';
     const parts = String(value).slice(0, 10).split('-');
@@ -96,7 +120,7 @@
 
   function groupedEntries() {
     const groups = new Map(CATEGORIES.map((category) => [category.id, []]));
-    profileEntries(state.company).forEach((entry) => groups.get(effectiveSetting(entry).category).push(entry));
+    availableProfileEntries().forEach((entry) => groups.get(effectiveSetting(entry).category).push(entry));
     return groups;
   }
 
@@ -126,7 +150,7 @@
     button.type = 'button';
     button.dataset.profileKey = entry.key;
     const name = element('span', 'international-profile-name', entry.profile.name);
-    const code = element('span', 'international-profile-code', profileAbbreviation(entry.profile.name));
+    const code = element('span', 'international-profile-code', entry.profile.shortCode || profileAbbreviation(entry.profile.name));
     button.append(name, code);
     button.addEventListener('click', () => selectProfile(entry, button));
     return button;
@@ -178,6 +202,111 @@
       elements.profiles.append(group);
     });
     if (!elements.profiles.children.length) elements.profiles.append(element('div', 'international-empty', 'Nenhum perfil disponível para esta companhia.'));
+    renderDeletedProfiles();
+  }
+
+  function formField(labelText, control) {
+    const field = element('div', 'field');
+    field.append(element('label', '', labelText), control);
+    return field;
+  }
+
+  function openProfileEditor(entry = null) {
+    if (!canManage()) return;
+    const profile = entry?.profile || { name: '', fields: {} };
+    const setting = entry ? effectiveSetting(entry) : { category: 'economy', ruleUpdatedOn: null };
+    const dialog = element('dialog', 'international-profile-dialog');
+    const form = element('form', 'international-profile-form'); form.method = 'dialog';
+    const header = element('div', 'international-profile-dialog-head');
+    const heading = element('div'); heading.append(element('h2', '', entry ? 'Editar perfil de tarifa' : 'Novo perfil de tarifa'), element('p', 'muted small', `${state.company.name} (${state.company.code})`));
+    const close = element('button', 'international-profile-dialog-close', '×'); close.type = 'button'; close.addEventListener('click', () => dialog.close());
+    header.append(heading, close);
+    const grid = element('div', 'international-profile-form-grid');
+    const name = element('input'); name.required = true; name.maxLength = 300; name.value = profile.name || '';
+    const shortCode = element('input'); shortCode.maxLength = 20; shortCode.value = profile.shortCode || profileAbbreviation(profile.name);
+    const category = element('select'); CATEGORIES.forEach((item) => category.add(new Option(item.label, item.id))); category.value = setting.category;
+    const reviewDate = element('input'); reviewDate.type = 'date'; reviewDate.value = setting.ruleUpdatedOn || '';
+    grid.append(formField('Nome do perfil', name), formField('Código curto', shortCode), formField('Categoria', category), formField('Última revisão', reviewDate));
+    const fieldControls = {};
+    Object.entries(FIELD_LABELS).forEach(([key, label]) => {
+      const textarea = element('textarea'); textarea.rows = 3; textarea.maxLength = 2000; textarea.value = profile.fields?.[key] || '';
+      fieldControls[key] = textarea; grid.append(formField(label, textarea));
+    });
+    const note = element('div', 'international-profile-audit-note', 'ⓘ As alterações serão registradas com usuário, data e hora.');
+    const message = element('div', 'international-profile-form-message');
+    const footer = element('div', 'international-profile-dialog-actions');
+    const left = element('div');
+    if (entry && !entry.custom) {
+      const restore = element('button', 'btn international-profile-restore', 'Restaurar conteúdo original'); restore.type = 'button';
+      restore.addEventListener('click', () => restoreOriginalProfile(entry, restore, dialog)); left.append(restore);
+    }
+    const right = element('div');
+    const cancel = element('button', 'btn secondary', 'Cancelar'); cancel.type = 'button'; cancel.addEventListener('click', () => dialog.close());
+    const save = element('button', 'btn primary', 'Salvar alterações'); save.type = 'submit'; right.append(cancel, save); footer.append(left, right);
+    form.append(header, grid, note, message, footer);
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const fields = Object.fromEntries(Object.entries(fieldControls).map(([key, control]) => [key, control.value.trim()]));
+      saveProfileContent(entry, { profileName: name.value.trim(), shortCode: shortCode.value.trim().toUpperCase(), category: category.value, ruleUpdatedOn: reviewDate.value || null, fields }, save, message, dialog);
+    });
+    dialog.append(form); document.body.append(dialog); dialog.addEventListener('close', () => dialog.remove(), { once: true }); dialog.showModal(); name.focus();
+  }
+
+  async function saveProfileContent(entry, values, button, message, dialog) {
+    if (!values.profileName) { message.textContent = 'Informe o nome do perfil.'; return; }
+    button.disabled = true; button.textContent = 'Salvando...';
+    const key = entry?.key || `custom:${crypto.randomUUID()}`;
+    const mutable = { profile_name: values.profileName, short_code: values.shortCode || null, category: values.category, rule_updated_on: values.ruleUpdatedOn, fields: values.fields, is_custom: Boolean(entry?.custom || !entry), is_active: true, deleted_at: null, deleted_by: null, updated_by: state.userId };
+    const exists = state.settings.has(key);
+    const result = exists
+      ? await state.client.from('international_fare_profile_settings').update(mutable).eq('organization_id', state.organizationId).eq('airline_code', state.company.code).eq('profile_key', key).select('*').single()
+      : await state.client.from('international_fare_profile_settings').insert({ ...mutable, organization_id: state.organizationId, airline_code: state.company.code, profile_key: key, created_by: state.userId }).select('*').single();
+    button.disabled = false; button.textContent = 'Salvar alterações';
+    if (result.error) { message.textContent = 'Não foi possível salvar o perfil.'; return; }
+    state.settings.set(key, result.data); state.selectedKey = key; dialog.close(); setStatus(entry ? 'Perfil editado com sucesso.' : 'Novo perfil criado com sucesso.', 'success'); render();
+  }
+
+  async function deleteProfile(entry, button) {
+    if (!canManage() || !confirm(`Excluir o perfil "${entry.profile.name}"? Ele poderá ser restaurado depois.`)) return;
+    button.disabled = true;
+    const mutable = { profile_name: entry.profile.name, category: effectiveSetting(entry).category, is_active: false, deleted_at: new Date().toISOString(), deleted_by: state.userId, updated_by: state.userId };
+    const result = state.settings.has(entry.key)
+      ? await state.client.from('international_fare_profile_settings').update(mutable).eq('organization_id', state.organizationId).eq('airline_code', state.company.code).eq('profile_key', entry.key).select('*').single()
+      : await state.client.from('international_fare_profile_settings').insert({ ...mutable, organization_id: state.organizationId, airline_code: state.company.code, profile_key: entry.key, is_custom: false, created_by: state.userId }).select('*').single();
+    button.disabled = false;
+    if (result.error) { setStatus('Não foi possível excluir o perfil.', 'error'); return; }
+    state.settings.set(entry.key, result.data); state.selectedKey = ''; setStatus('Perfil excluído. Ele pode ser restaurado no modo de gestão.', 'success'); render();
+  }
+
+  async function restoreDeletedProfile(entry, button) {
+    button.disabled = true;
+    const { data, error } = await state.client.from('international_fare_profile_settings').update({ is_active: true, deleted_at: null, deleted_by: null, updated_by: state.userId }).eq('organization_id', state.organizationId).eq('airline_code', state.company.code).eq('profile_key', entry.key).select('*').single();
+    if (error) { button.disabled = false; setStatus('Não foi possível restaurar o perfil.', 'error'); return; }
+    state.settings.set(entry.key, data); state.selectedKey = entry.key; setStatus('Perfil restaurado com sucesso.', 'success'); render();
+  }
+
+  async function restoreOriginalProfile(entry, button, dialog) {
+    if (!confirm('Restaurar nome e regras originais deste perfil?')) return;
+    button.disabled = true;
+    const saved = state.settings.get(entry.key);
+    if (!saved) { dialog.close(); return; }
+    const original = profileEntries(state.company).find((item) => item.key === entry.key)?.profile;
+    if (!original) { button.disabled = false; return; }
+    const { data, error } = await state.client.from('international_fare_profile_settings').update({ profile_name: original.name, short_code: null, fields: null, is_active: true, deleted_at: null, deleted_by: null, updated_by: state.userId }).eq('organization_id', state.organizationId).eq('airline_code', state.company.code).eq('profile_key', entry.key).select('*').single();
+    if (error) { button.disabled = false; setStatus('Não foi possível restaurar o conteúdo original.', 'error'); return; }
+    state.settings.set(entry.key, data); dialog.close(); setStatus('Conteúdo original restaurado.', 'success'); render();
+  }
+
+  function renderDeletedProfiles() {
+    if (!elements.deleted) return;
+    elements.deleted.replaceChildren();
+    if (!state.managing) return;
+    const deleted = availableProfileEntries(true).filter((entry) => state.settings.get(entry.key)?.is_active === false);
+    if (!deleted.length) return;
+    const section = element('section', 'international-deleted-profiles'); section.append(element('h3', '', `Perfis excluídos (${deleted.length})`));
+    const list = element('div', 'international-deleted-list');
+    deleted.forEach((entry) => { const row = element('div', 'international-deleted-row'); row.append(element('span', '', entry.profile.name)); const restore = element('button', 'btn secondary', 'Restaurar'); restore.type = 'button'; restore.addEventListener('click', () => restoreDeletedProfile(entry, restore)); row.append(restore); list.append(row); });
+    section.append(list); elements.deleted.append(section);
   }
 
   function selectProfile(entry, button) {
@@ -200,7 +329,13 @@
     copy.type = 'button'; copy.addEventListener('click', copySelected);
     const report = element('button', 'btn secondary international-report-button', '⚠ Informar regra desatualizada');
     report.type = 'button'; report.addEventListener('click', () => reportOutdated(entry, report));
-    actions.append(copy, report); head.append(actions);
+    actions.append(copy, report);
+    if (canManage()) {
+      const edit = element('button', 'btn secondary', '✎ Editar perfil'); edit.type = 'button'; edit.addEventListener('click', () => openProfileEditor(entry));
+      const remove = element('button', 'btn secondary international-profile-delete', 'Excluir perfil'); remove.type = 'button'; remove.addEventListener('click', () => deleteProfile(entry, remove));
+      actions.append(edit, remove);
+    }
+    head.append(actions);
     const copyText = [`${state.company.code} - ${state.company.name}`, `PERFIL: ${profile.name}`, '', ...entries.map(([key, value]) => `${FIELD_LABELS[key].toUpperCase()}: ${value}`)].join('\n');
     const hiddenCopy = element('pre', 'copy-output', copyText); hiddenCopy.id = 'internationalFareCopyText';
     hiddenCopy.hidden = true;
@@ -209,7 +344,7 @@
 
   function selectFirstProfile() {
     const groups = groupedEntries();
-    let entry = profileEntries(state.company).find((item) => item.key === state.selectedKey);
+    let entry = availableProfileEntries().find((item) => item.key === state.selectedKey);
     if (entry && !categoryIsVisible(effectiveSetting(entry).category) && !state.managing) entry = null;
     if (!entry) {
       for (const category of CATEGORIES) {
@@ -231,6 +366,7 @@
   function render() {
     if (!state.company) return;
     elements.manage?.classList.toggle('hidden', !canManage());
+    elements.newProfile?.classList.toggle('hidden', !canManage());
     if (elements.manage) elements.manage.textContent = state.managing ? 'Concluir gestão' : '⚙ Gerenciar categorias';
     renderGroups();
     selectFirstProfile();
@@ -241,7 +377,7 @@
     state.settings = new Map(); state.categoryVisibility = new Map(); state.databaseAvailable = true;
     if (!state.client || !state.organizationId || !state.company) { render(); return; }
     const [profilesResult, categoriesResult] = await Promise.all([
-      state.client.from('international_fare_profile_settings').select('profile_key,category,rule_updated_on').eq('organization_id', state.organizationId).eq('airline_code', state.company.code),
+      state.client.from('international_fare_profile_settings').select('profile_key,profile_name,short_code,category,rule_updated_on,fields,is_custom,is_active,created_by,updated_by,created_at,updated_at,deleted_at,deleted_by').eq('organization_id', state.organizationId).eq('airline_code', state.company.code),
       state.client.from('international_fare_category_settings').select('category,is_visible').eq('organization_id', state.organizationId).eq('airline_code', state.company.code),
     ]);
     if (generation !== state.generation) return;
@@ -273,8 +409,8 @@
     }
     const mutablePayload = { profile_name: entry.profile.name, category, rule_updated_on: ruleUpdatedOn || null, updated_by: state.userId };
     const result = state.settings.has(entry.key)
-      ? await state.client.from('international_fare_profile_settings').update(mutablePayload).eq('organization_id', state.organizationId).eq('airline_code', state.company.code).eq('profile_key', entry.key).select('profile_key,category,rule_updated_on').single()
-      : await state.client.from('international_fare_profile_settings').insert({ ...mutablePayload, organization_id: state.organizationId, airline_code: state.company.code, profile_key: entry.key }).select('profile_key,category,rule_updated_on').single();
+      ? await state.client.from('international_fare_profile_settings').update(mutablePayload).eq('organization_id', state.organizationId).eq('airline_code', state.company.code).eq('profile_key', entry.key).select('*').single()
+      : await state.client.from('international_fare_profile_settings').insert({ ...mutablePayload, organization_id: state.organizationId, airline_code: state.company.code, profile_key: entry.key, created_by: state.userId }).select('*').single();
     const { data, error } = result;
     button.disabled = false; button.textContent = 'Salvar';
     if (error) { setStatus('Não foi possível salvar a categoria.', 'error'); return; }
@@ -330,10 +466,13 @@
       profiles: document.getElementById('internationalProfiles'),
       description: document.getElementById('internationalFareDescription'),
       manage: document.getElementById('internationalFareManage'),
+      newProfile: document.getElementById('internationalFareNew'),
+      deleted: document.getElementById('internationalFareDeleted'),
       status: document.getElementById('internationalFareStatus'),
     });
     if (!elements.root) return;
     elements.manage?.addEventListener('click', toggleManage);
+    elements.newProfile?.addEventListener('click', () => openProfileEditor());
     document.addEventListener('click', () => closeMenus());
   }
 
@@ -348,7 +487,8 @@
 
   function reset() {
     state.generation++; state.client = null; state.organizationId = null; state.userId = null; state.role = null;
-    state.settings = new Map(); state.categoryVisibility = new Map(); state.managing = false;
+    state.settings = new Map(); state.categoryVisibility = new Map(); state.managing = false; state.company = null; state.selectedKey = '';
+    document.querySelectorAll('.international-profile-dialog').forEach((dialog) => dialog.remove());
     setStatus('');
   }
 
