@@ -39,6 +39,9 @@ Deno.test('integra somente a seção internacional e preserva cópia e regras', 
   assert(html.includes('international-fare-profiles.css'), 'Falta o estilo isolado.');
   assert(html.includes('international-fare-profiles.js'), 'Falta o módulo isolado.');
   assert(js.includes("navigator.clipboard.writeText(text)"), 'Copiar perfil deve continuar usando a área de transferência.');
+  assert(!js.includes(".upsert("), 'A persistência não deve tentar atualizar colunas imutáveis via upsert.');
+  assert(js.includes(".update(mutablePayload)"), 'Registros existentes devem atualizar somente campos permitidos.');
+  assert(js.includes(".insert({ ...mutablePayload"), 'Novos registros devem usar inserção separada.');
   for (const field of ['seat', 'carryOn', 'checked', 'change', 'refund', 'noShow', 'openTicket']) {
     assert(js.includes(`${field}:`), `O campo ${field} deve continuar disponível.`);
   }

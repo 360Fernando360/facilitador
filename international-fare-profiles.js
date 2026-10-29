@@ -260,16 +260,22 @@
     if (!canManage() || !state.client || !state.organizationId || !state.userId) return;
     button.disabled = true; button.textContent = 'Salvando...';
     if (!categoryIsVisible(category)) {
-      const visibilityPayload = { organization_id: state.organizationId, airline_code: state.company.code, category, is_visible: true, updated_by: state.userId };
-      const { error: visibilityError } = await state.client.from('international_fare_category_settings').upsert(visibilityPayload, { onConflict: 'organization_id,airline_code,category' });
+      const visibilityPayload = { is_visible: true, updated_by: state.userId };
+      const visibilityResult = state.categoryVisibility.has(category)
+        ? await state.client.from('international_fare_category_settings').update(visibilityPayload).eq('organization_id', state.organizationId).eq('airline_code', state.company.code).eq('category', category)
+        : await state.client.from('international_fare_category_settings').insert({ ...visibilityPayload, organization_id: state.organizationId, airline_code: state.company.code, category });
+      const visibilityError = visibilityResult.error;
       if (visibilityError) {
         button.disabled = false; button.textContent = 'Salvar';
         setStatus('Não foi possível restaurar a categoria de destino.', 'error'); return;
       }
       state.categoryVisibility.set(category, true);
     }
-    const payload = { organization_id: state.organizationId, airline_code: state.company.code, profile_key: entry.key, profile_name: entry.profile.name, category, rule_updated_on: ruleUpdatedOn || null, updated_by: state.userId };
-    const { data, error } = await state.client.from('international_fare_profile_settings').upsert(payload, { onConflict: 'organization_id,airline_code,profile_key' }).select('profile_key,category,rule_updated_on').single();
+    const mutablePayload = { profile_name: entry.profile.name, category, rule_updated_on: ruleUpdatedOn || null, updated_by: state.userId };
+    const result = state.settings.has(entry.key)
+      ? await state.client.from('international_fare_profile_settings').update(mutablePayload).eq('organization_id', state.organizationId).eq('airline_code', state.company.code).eq('profile_key', entry.key).select('profile_key,category,rule_updated_on').single()
+      : await state.client.from('international_fare_profile_settings').insert({ ...mutablePayload, organization_id: state.organizationId, airline_code: state.company.code, profile_key: entry.key }).select('profile_key,category,rule_updated_on').single();
+    const { data, error } = result;
     button.disabled = false; button.textContent = 'Salvar';
     if (error) { setStatus('Não foi possível salvar a categoria.', 'error'); return; }
     state.settings.set(entry.key, data); setStatus('Perfil atualizado com sucesso.', 'success'); render();
@@ -278,8 +284,11 @@
   async function saveCategoryVisibility(category, visible, button) {
     if (!canManage() || !state.client || !state.organizationId || !state.userId) return;
     button.disabled = true;
-    const payload = { organization_id: state.organizationId, airline_code: state.company.code, category, is_visible: visible, updated_by: state.userId };
-    const { error } = await state.client.from('international_fare_category_settings').upsert(payload, { onConflict: 'organization_id,airline_code,category' });
+    const mutablePayload = { is_visible: visible, updated_by: state.userId };
+    const result = state.categoryVisibility.has(category)
+      ? await state.client.from('international_fare_category_settings').update(mutablePayload).eq('organization_id', state.organizationId).eq('airline_code', state.company.code).eq('category', category)
+      : await state.client.from('international_fare_category_settings').insert({ ...mutablePayload, organization_id: state.organizationId, airline_code: state.company.code, category });
+    const { error } = result;
     if (error) { button.disabled = false; setStatus('Não foi possível atualizar a categoria.', 'error'); return; }
     state.categoryVisibility.set(category, visible); setStatus(visible ? 'Categoria restaurada.' : 'Categoria ocultada para esta companhia.', 'success'); render();
   }
