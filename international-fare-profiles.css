@@ -1,0 +1,39 @@
+.international-fares-card{padding:20px}
+.international-fares-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+.international-fares-card-head h2{margin:0;color:var(--navy)}
+.international-fares-card-head p{margin:5px 0 0}
+.international-fare-manage{flex:none;padding:9px 12px}
+.international-fare-status{min-height:18px;margin:-7px 0 10px;font-size:12px;font-weight:700;color:var(--muted)}
+.international-fare-status.success{color:#15803d}.international-fare-status.error{color:#b91c1c}
+.international-profile-groups{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.international-profile-group{--fare-accent:#2563eb;min-width:0;border:1px solid var(--line);border-radius:11px;background:#fff;box-shadow:0 5px 16px #0f172a0a;overflow:visible}
+.international-profile-group[data-category="premium"]{--fare-accent:#ea580c}
+.international-profile-group[data-category="business"]{--fare-accent:#059669}
+.international-profile-group[data-category="first"]{--fare-accent:#7c3aed}
+.international-profile-group.is-hidden-category{opacity:.62;background:#f8fafc}
+.international-profile-group-head{position:relative;display:flex;align-items:center;gap:7px;min-height:44px;padding:10px 10px 8px;border-bottom:2px solid var(--fare-accent);color:var(--fare-accent)}
+.international-profile-group-head h3{min-width:0;margin:0;font-size:12px;line-height:1.25;color:inherit;text-transform:uppercase}
+.international-profile-group-icon{font-size:15px}.international-profile-group-count{margin-left:auto;color:var(--muted);font-size:10px;font-weight:700;white-space:nowrap}
+.international-category-menu-button{width:26px;height:26px;flex:none;border:0;border-radius:7px;background:transparent;color:var(--navy);cursor:pointer;font-weight:900}
+.international-category-menu-button:hover{background:#f1f5f9}
+.international-category-menu{position:absolute;z-index:4;right:8px;top:38px;width:210px;padding:6px;background:#fff;border:1px solid var(--line);border-radius:9px;box-shadow:0 14px 32px #0f172a26}
+.international-category-menu button{width:100%;border:0;border-radius:7px;padding:9px;text-align:left;background:#fff;color:var(--text);cursor:pointer;font:700 11px Segoe UI,Arial,sans-serif}
+.international-category-menu button:hover{background:#f1f5f9}.international-category-menu button.danger{color:#b91c1c}.international-category-menu button:disabled{opacity:.45;cursor:not-allowed}
+.international-profile-list{display:grid;align-content:start;gap:6px;padding:9px;min-height:62px}
+.international-profile{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;width:100%;min-height:33px;border:1px solid var(--line);border-radius:7px;padding:7px 8px;background:#f8fafc;color:var(--navy);font:700 10px/1.25 Segoe UI,Arial,sans-serif;text-align:left;cursor:pointer}
+.international-profile:hover{border-color:var(--fare-accent);background:#fff}.international-profile.active{background:var(--fare-accent);border-color:var(--fare-accent);color:#fff}
+.international-profile-name{min-width:0;overflow-wrap:anywhere}.international-profile-code{font-size:9px;color:var(--muted);white-space:nowrap}.international-profile.active .international-profile-code{color:#fff}
+.international-profile-empty{padding:10px 4px;color:var(--muted);font-size:11px;text-align:center}
+.international-profile-admin{display:grid;gap:6px;padding:7px;border:1px solid var(--line);border-radius:8px;background:#f8fafc}
+.international-profile-admin button{min-height:30px}
+.international-profile-admin-controls{display:grid;grid-template-columns:1fr;gap:5px}
+.international-profile-admin select,.international-profile-admin input{height:31px;padding:0 7px;font-size:10px}
+.international-profile-admin small{color:var(--muted);font-size:9px}
+.international-fare-groups-note{margin:10px 0 0;color:var(--muted);font-size:11px}
+.international-description-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.international-description-head h3{margin:0}.international-description-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.international-updated-badge{padding:5px 8px;border-radius:999px;background:#e0e7ff;color:#3730a3;font-size:10px;font-weight:800}
+.international-report-button{border:1px solid #fca5a5!important;color:#b91c1c!important;background:#fff!important}
+.international-report-button:disabled{opacity:.65;cursor:wait}
+@media(max-width:1050px){.international-profile-groups{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.international-fares-card-head{flex-direction:column}.international-fare-manage{width:100%}.international-profile-groups{grid-template-columns:1fr}.international-description-head{align-items:flex-start;flex-direction:column}.international-description-actions{width:100%}.international-description-actions .btn{flex:1}}

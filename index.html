@@ -90,6 +90,7 @@ input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:9
 </style>
 <link rel="stylesheet" href="./my-accesses.css">
 <link rel="stylesheet" href="./quotation-builder.css">
+<link rel="stylesheet" href="./international-fare-profiles.css">
 </head>
 <body>
 <section id="login" class="screen active">
@@ -292,7 +293,7 @@ input,select{width:100%;height:42px;border:1px solid var(--line);border-radius:9
 <section id="page-inter" class="app-page hidden">
 <div class="international-heading"><div><h1>Atendimento Internacional</h1><p class="muted">Consulte e copie as regras das famílias tarifárias por companhia aérea.</p></div><div class="international-controls"><div class="field"><label for="internationalSearch">Buscar companhia</label><input id="internationalSearch" type="search" placeholder="Nome ou código" oninput="filterInternationalAirlines()"></div><div class="field"><label for="internationalAirline">Companhia aérea</label><select id="internationalAirline" onchange="selectInternationalAirline()"></select></div></div></div>
 <section class="card international-banner"><span id="internationalCode" class="international-code">INTER</span><h2 id="internationalName">Selecione uma companhia</h2><p id="internationalReference"></p></section>
-<section class="card"><h2>Perfis de tarifa</h2><p class="muted">Selecione um perfil para consultar assento, bagagens, alteração, reembolso e demais regras disponíveis.</p><div id="internationalProfiles" class="international-profile-grid"></div><div id="internationalFareDescription" class="international-description"><div class="international-empty">Selecione uma companhia e um perfil.</div></div></section>
+<section id="internationalFareProfilesCard" class="card international-fares-card"><div class="international-fares-card-head"><div><h2>Perfis de tarifa (Branded Fares)</h2><p class="muted">Selecione uma classe de cabine e a família para consultar assentos, bagagens e regras.</p></div><button id="internationalFareManage" class="btn secondary international-fare-manage hidden" type="button">⚙ Gerenciar categorias</button></div><div id="internationalFareStatus" class="international-fare-status" role="status" aria-live="polite"></div><div id="internationalProfiles" class="international-profile-groups"></div><p class="international-fare-groups-note">ⓘ Categorias sem perfis não aparecem para consultores.</p><div id="internationalFareDescription" class="international-description"><div class="international-empty">Selecione uma companhia e um perfil.</div></div></section>
 <section id="quotationBuilder" class="card quote-module">
 <div class="quote-module-head"><div><h2>Cotação</h2><p class="muted">Combine o texto original do GDS com perfis de tarifa e textos complementares.</p></div><button id="quotationManageButton" class="btn secondary quote-management-button hidden" type="button">⚙ Gerenciar textos</button></div>
 <div id="quotationBuilderWorkspace">
@@ -443,6 +444,7 @@ Passo4.: Contato com a Central de Atendimento para envio da documentação, inse
 <script src="./supabase-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="./international-fares.js"></script>
+<script src="./international-fare-profiles.js"></script>
 <script src="./exchange-rates.js"></script>
 <script src="./international-reissue.js"></script>
 <script src="./my-accesses.js"></script>
@@ -493,7 +495,7 @@ function clearDailySessionTimer(){
  dailySessionTimerId=null;dailySessionDeadline=null;
 }
 function clearAuthenticatedSessionData(){
- stopActivityTracking();clearDailySessionTimer();window.MyAccesses?.reset();window.CustomerSearch?.reset();window.QuotationBuilder?.reset();
+ stopActivityTracking();clearDailySessionTimer();window.MyAccesses?.reset();window.CustomerSearch?.reset();window.QuotationBuilder?.reset();window.InternationalFareProfiles?.reset();
  currentMembership=null;currentUserId=null;organizationMembersCache=[];
  document.getElementById('companyName').textContent='';
  document.getElementById('welcomeName').textContent='colaborador';
@@ -723,10 +725,9 @@ async function initializeAuthentication(){
  const {data:{session}}=await supabaseClient.auth.getSession();
  if(recoveryMode)showPasswordSetup(passwordFlow);else await applySession(session);
 }
-const INTERNATIONAL_FIELD_LABELS={seat:'Assento',carryOn:'Bagagem de mão',checked:'Bagagem despachada',change:'Alteração',refund:'Reembolso',noShow:'No-show',openTicket:'Deixar em aberto'};
 let visibleInternationalAirlines=[];
-function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,character=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]))}
 function initializeInternationalFares(){
+ window.InternationalFareProfiles?.init();
  visibleInternationalAirlines=typeof INTERNATIONAL_FARES==='undefined'?[]:INTERNATIONAL_FARES;
  renderInternationalAirlineOptions();
 }
@@ -755,21 +756,10 @@ function selectInternationalAirline(){
  document.getElementById('internationalCode').textContent=company.code;
  document.getElementById('internationalName').textContent=company.name;
  document.getElementById('internationalReference').textContent=company.reference;
- company.profiles.forEach((profile,index)=>{const button=document.createElement('button');button.className='international-profile';button.type='button';button.textContent=profile.name;button.onclick=()=>selectInternationalProfile(button,company,index);profiles.appendChild(button)});
- profiles.querySelector('.international-profile')?.click();
-}
-function selectInternationalProfile(button,company,index){
- document.querySelectorAll('#internationalProfiles .international-profile').forEach(item=>item.classList.remove('active'));button.classList.add('active');
- const profile=company.profiles[index],entries=Object.entries(profile.fields).filter(([key,value])=>INTERNATIONAL_FIELD_LABELS[key]&&value);
- const details=entries.map(([key,value])=>`<div class="international-detail"><strong>${INTERNATIONAL_FIELD_LABELS[key]}</strong><span class="${fareStatusClass(value)}">${escapeHtml(value)}</span></div>`).join('');
- const copyText=[`${company.code} - ${company.name}`,`PERFIL: ${profile.name}`,'',...entries.map(([key,value])=>`${INTERNATIONAL_FIELD_LABELS[key].toUpperCase()}: ${value}`)].join('\n');
- const description=document.getElementById('internationalFareDescription');
- description.innerHTML=`<h3>${escapeHtml(profile.name)}</h3><div class="international-detail-grid">${details}</div><div class="copy-box"><pre id="internationalFareCopyText" class="copy-output"></pre><div class="copy-box-actions"><button class="btn secondary" type="button" onclick="copyInternationalFare()">Copiar perfil</button></div></div>`;
- document.getElementById('internationalFareCopyText').textContent=copyText;
+ window.InternationalFareProfiles?.selectCompany(company.code);
 }
 async function copyInternationalFare(){
- const text=document.getElementById('internationalFareCopyText')?.textContent;if(!text)return;
- try{await navigator.clipboard.writeText(text);alert('Informações do perfil copiadas.')}catch(_error){alert('Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.')}
+ return window.InternationalFareProfiles?.copySelected();
 }
 const internationalReissueSources={};
 function parseInternationalAmount(value){
@@ -871,7 +861,11 @@ async function showPage(page,validateMembership=true){
  if(page==='home')loadDashboard();
  if(page==='accesses')window.MyAccesses?.open(supabaseClient,currentUserId);
  if(page==='comercial')window.CustomerSearch?.open(supabaseClient);
- if(page==='inter')window.QuotationBuilder?.open(supabaseClient,{organizationId:currentMembership?.organization_id,userId:currentUserId,role:currentMembership?.role});
+ if(page==='inter'){
+   const internationalContext={organizationId:currentMembership?.organization_id,userId:currentUserId,role:currentMembership?.role};
+   window.InternationalFareProfiles?.open(supabaseClient,internationalContext);
+   window.QuotationBuilder?.open(supabaseClient,internationalContext);
+ }
  if(page==='admin'){loadMembers();startAdminActivityRefresh()}else if(adminActivityRefreshId){clearInterval(adminActivityRefreshId);adminActivityRefreshId=null}
  if(page==='nacional'){
    const airline=document.getElementById('nationalAirline').value;
