@@ -1165,7 +1165,7 @@ async function copyFareProfile(){
  try{await navigator.clipboard.writeText(text);alert('Informações do perfil copiadas.')}catch(_error){alert('Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.')}
 }
 const GOL_FARE_PROFILES={
- Light:{carryOn:'1 mala de 12 kg + mochila ou bolsa de até 10 kg',checked:'1 mala de até 23 kg',seat:'Apenas com custo',change:'Multa de R$ 475,00 por trecho',refund:'Não permitido (reembolsa apenas as taxas de embarque)',noShow:'Multa de R$ 500,00'},
+ Light:{carryOn:'1 mala de 12 kg + mochila ou bolsa de até 10 kg',checked:'Não permite',seat:'Apenas com custo',change:'Multa de R$ 475,00 por trecho',refund:'Não permitido (reembolsa apenas as taxas de embarque)',noShow:'Multa de R$ 500,00'},
  Classic:{carryOn:'1 mala de 12 kg + mochila ou bolsa de até 10 kg',checked:'1 mala de até 23 kg',seat:'Padrão (sem custo)',change:'Multa de R$ 455,00 por trecho',refund:'Não permitido (reembolsa apenas as taxas de embarque)',noShow:'Multa de R$ 500,00'},
  Flex:{carryOn:'1 mala de 12 kg + mochila ou bolsa de até 10 kg',checked:'1 mala de até 23 kg',seat:'Padrão ou GOL+ Conforto (sem custo)',changeBefore:'Sem multa',changeAfter:'Sem multa',refundBefore:'Sem multa',refundAfter:'Sem multa'}
 };
