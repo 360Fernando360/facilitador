@@ -453,6 +453,13 @@ Passo4.: Contato com a Central de Atendimento para envio da documentação, inse
 <script src="./customer-search.js"></script>
 <script src="./quotation-builder.js"></script>
 <script>
+function disableFacilitatorAutocomplete(root=document){
+ const selector='form,input,textarea,select';
+ if(root.nodeType===Node.ELEMENT_NODE&&root.matches(selector))root.setAttribute('autocomplete','off');
+ root.querySelectorAll?.(selector).forEach(element=>element.setAttribute('autocomplete','off'));
+}
+disableFacilitatorAutocomplete();
+new MutationObserver(mutations=>mutations.forEach(mutation=>mutation.addedNodes.forEach(node=>{if(node.nodeType===Node.ELEMENT_NODE)disableFacilitatorAutocomplete(node)}))).observe(document.body,{childList:true,subtree:true});
 const SUPABASE_URL=window.SUPABASE_CONFIG?.url||'';
 const SUPABASE_PUBLISHABLE_KEY=window.SUPABASE_CONFIG?.publishableKey||'';
 const hasSupabaseConfiguration=SUPABASE_URL.startsWith('https://')&&!SUPABASE_URL.includes('COLE_AQUI')&&SUPABASE_PUBLISHABLE_KEY&&!SUPABASE_PUBLISHABLE_KEY.includes('COLE_AQUI');
