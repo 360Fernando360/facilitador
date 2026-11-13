@@ -97,6 +97,23 @@
     return parts.length === 3 ? `Atualizado em: ${parts[2]}/${parts[1]}/${parts[0]}` : 'Data de revisão não informada';
   }
 
+  function profileCopyText(company, profile) {
+    const entries = Object.entries(profile?.fields || {}).filter(([key, value]) => FIELD_LABELS[key] && value);
+    const rows = entries.map(([key, value]) => ({ label: FIELD_LABELS[key].toUpperCase(), value: String(value) }));
+    const labelWidth = Math.max(0, ...rows.map(({ label }) => label.length));
+    const formattedRows = rows.map(({ label, value }) => {
+      const prefix = `${label.padEnd(labelWidth, '.')}: `;
+      const continuation = ' '.repeat(prefix.length);
+      return `${prefix}${value.replace(/\r?\n/g, `\n${continuation}`)}`;
+    });
+    return [`${company.code} - ${company.name}`, `PERFIL: ${profile.name}`, '', ...formattedRows].join('\n');
+  }
+
+  function profileCopyHtml(text) {
+    const escaped = String(text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return `<pre style="margin:0;font-family:Consolas,'Courier New',monospace;font-size:13px;line-height:1.5;white-space:pre;color:#111827">${escaped}</pre>`;
+  }
+
   function isMissingTable(error) {
     const message = [error?.message, error?.details, error?.hint].filter(Boolean).join(' ').toLowerCase();
     return ['42P01', 'PGRST205', 'PGRST204'].includes(error?.code) || message.includes('international_fare_');
@@ -336,7 +353,7 @@
       actions.append(edit, remove);
     }
     head.append(actions);
-    const copyText = [`${state.company.code} - ${state.company.name}`, `PERFIL: ${profile.name}`, '', ...entries.map(([key, value]) => `${FIELD_LABELS[key].toUpperCase()}: ${value}`)].join('\n');
+    const copyText = profileCopyText(state.company, profile);
     const hiddenCopy = element('pre', 'copy-output', copyText); hiddenCopy.id = 'internationalFareCopyText';
     hiddenCopy.hidden = true;
     elements.description.replaceChildren(head, details, hiddenCopy);
@@ -442,8 +459,15 @@
   async function copySelected() {
     const text = document.getElementById('internationalFareCopyText')?.textContent;
     if (!text) return;
-    try { await navigator.clipboard.writeText(text); alert('Informações do perfil copiadas.'); }
-    catch (_error) { alert('Não foi possível copiar automaticamente.'); }
+    const html = profileCopyHtml(text);
+    try {
+      if (navigator.clipboard.write && typeof ClipboardItem !== 'undefined') await navigator.clipboard.write([new ClipboardItem({ 'text/plain': new Blob([text], { type: 'text/plain' }), 'text/html': new Blob([html], { type: 'text/html' }) })]);
+      else await navigator.clipboard.writeText(text);
+      alert('Informações do perfil copiadas.');
+    } catch (_error) {
+      try { await navigator.clipboard.writeText(text); alert('Informações do perfil copiadas como texto simples.'); }
+      catch (_fallbackError) { alert('Não foi possível copiar automaticamente.'); }
+    }
   }
 
   function selectCompany(code) {
@@ -492,6 +516,6 @@
     setStatus('');
   }
 
-  global.InternationalFareProfilesCore = Object.freeze({ CATEGORIES, defaultCategory, profileEntries, profileAbbreviation, formatDate });
+  global.InternationalFareProfilesCore = Object.freeze({ CATEGORIES, defaultCategory, profileEntries, profileAbbreviation, formatDate, profileCopyText, profileCopyHtml });
   global.InternationalFareProfiles = Object.freeze({ init, open, reset, selectCompany, copySelected });
 })(typeof window === 'undefined' ? globalThis : window);

@@ -32,6 +32,23 @@ Deno.test('formata a data de revisão sem inventar datas ausentes', () => {
   assertEquals(formatDate(null), 'Data de revisão não informada', 'Data ausente deve ser explicitada.');
 });
 
+Deno.test('alinha e preserva a formatação ao copiar um perfil tarifário', () => {
+  const { profileCopyText, profileCopyHtml } = InternationalFareProfilesCore;
+  const text = profileCopyText(
+    { code: 'AA', name: 'American Airlines' },
+    { name: 'MAINPL - MAIN PLUS', fields: { seat: 'Permitido', carryOn: '01 mala de 10kg', checked: '02 malas de 23kg', change: 'Sem multa', refund: 'Não permite', openTicket: 'Permitido' } },
+  );
+  assert(text.startsWith('AA - American Airlines\nPERFIL: MAINPL - MAIN PLUS\n\n'), 'Cabeçalho do perfil deve ser preservado.');
+  const rows = text.split('\n').slice(3);
+  assertEquals(new Set(rows.map((row) => row.indexOf(':'))).size, 1, 'Todos os rótulos devem terminar na mesma coluna.');
+  assert(text.includes('ASSENTO...........: Permitido'), 'Rótulos curtos devem receber preenchimento visual.');
+  assert(text.includes('BAGAGEM DESPACHADA: 02 malas de 23kg'), 'O maior rótulo deve preservar seu conteúdo.');
+  const html = profileCopyHtml(text);
+  for (const expected of ['<pre', 'font-family:Consolas', 'white-space:pre', 'AA - American Airlines', 'BAGAGEM DESPACHADA:']) {
+    assert(html.includes(expected), `HTML da cópia sem ${expected}.`);
+  }
+});
+
 Deno.test('integra somente a seção internacional e preserva cópia e regras', async () => {
   const html = await Deno.readTextFile(`${root}/index.html`);
   const js = await Deno.readTextFile(`${root}/international-fare-profiles.js`);
